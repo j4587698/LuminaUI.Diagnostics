@@ -11,7 +11,7 @@ public sealed class LuminaUIDiagnosticsOptions
 
     public int DefaultTimeoutMs { get; set; } = LuminaUIDiagnosticsProtocol.DefaultTimeoutMs;
 
-    public bool EnableDevTools { get; set; }
+    public bool EnableDevTools { get; set; } = true;
 
     public KeyGesture? DevToolsGesture { get; set; }
 

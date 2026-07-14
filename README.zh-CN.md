@@ -42,19 +42,18 @@ public static AppBuilder BuildAvaloniaApp()
 #endif
 ```
 
-`UseLuminaUIDiagnostics()` 启动命名管道服务器，之后 MCP 工具或外部 DevTools 即可连接。
+`UseLuminaUIDiagnostics()` 默认启动命名管道服务器并注册 F12 打开 DevTools。
 
-按 F12 打开内嵌 DevTools 窗口？加个配置即可：
+仅需 MCP 不要 DevTools？关闭即可：
 
 ```csharp
-.UseLuminaUIDiagnostics(o => o.EnableDevTools = true);
+.UseLuminaUIDiagnostics(o => o.EnableDevTools = false);
 ```
 
 自定义快捷键：
 
 ```csharp
 .UseLuminaUIDiagnostics(o => {
-    o.EnableDevTools = true;
     o.DevToolsGesture = new KeyGesture(Key.F12, KeyModifiers.Ctrl);
 });
 ```
