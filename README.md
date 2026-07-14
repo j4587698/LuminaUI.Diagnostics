@@ -38,12 +38,13 @@ public static AppBuilder BuildAvaloniaApp()
         .WithInterFont()
         .LogToTrace()
 #if DEBUG
-        .UseLuminaUIDiagnostics()
-        .AttachLuminaDevTools();
+        .UseLuminaUIDiagnostics();
 #endif
 ```
 
-`UseLuminaUIDiagnostics()` 启动命名管道服务器，`AttachLuminaDevTools()` 注册 F12 快捷键打开 Lumina DevTools 窗口。
+`UseLuminaUIDiagnostics()` 启动命名管道服务器，之后 MCP 工具或外部 DevTools 即可连接。
+
+想要按 F12 打开内嵌 DevTools 窗口？额外调用 `.AttachLuminaDevTools()`。
 
 ### 2. 使用 MCP 工具
 
