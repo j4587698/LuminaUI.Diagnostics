@@ -65,4 +65,5 @@ jobs:
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git tag $tag
+          git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
           git push origin $tag
