@@ -1,8 +1,8 @@
 <Project>
   <PropertyGroup>
-    <LuminaUIDiagnosticsVersion>0.1.2</LuminaUIDiagnosticsVersion>
+    <LuminaUIDiagnosticsVersion>0.2.0</LuminaUIDiagnosticsVersion>
     <LuminaUIDiagnosticsMcpVersion>0.1.3</LuminaUIDiagnosticsMcpVersion>
-    <LuminaUIDiagnosticsAssemblyVersion>0.1.2.0</LuminaUIDiagnosticsAssemblyVersion>
+    <LuminaUIDiagnosticsAssemblyVersion>0.2.0.0</LuminaUIDiagnosticsAssemblyVersion>
     <LuminaUIDiagnosticsMcpAssemblyVersion>0.1.3.0</LuminaUIDiagnosticsMcpAssemblyVersion>
 
     <Version>$(LuminaUIDiagnosticsVersion)</Version>
