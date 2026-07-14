@@ -60,12 +60,20 @@ public static AppBuilder BuildAvaloniaApp()
 
 ### 2. 使用 MCP 工具
 
+安装全局 tool（传统方式）：
+
 ```bash
 dotnet tool install -g LuminaUI.Diagnostics.Mcp
 lumina-mcp
 ```
 
-然后在支持 MCP 的客户端中配置：
+.NET 10+ 可用 `dnx` 免安装运行（类似 `npx`）：
+
+```bash
+dnx lumina-mcp
+```
+
+然后在支持 MCP 的客户端（如 opencode、VS Code）中配置：
 
 ```json
 {
@@ -73,6 +81,20 @@ lumina-mcp
     "LuminaUI.Diagnostics": {
       "type": "stdio",
       "command": "lumina-mcp"
+    }
+  }
+}
+```
+
+如果用的是 `dnx` 免安装方式，command 改成：
+
+```json
+{
+  "servers": {
+    "LuminaUI.Diagnostics": {
+      "type": "stdio",
+      "command": "dnx",
+      "args": ["lumina-mcp"]
     }
   }
 }
