@@ -37,7 +37,13 @@ public static class LuminaUIDiagnosticsExtensions
             RegisterProcessCleanup();
         }
 
-        return builder.AfterSetup(RegisterApplicationCleanup);
+        return builder.AfterSetup(_ =>
+        {
+            RegisterApplicationCleanup(_);
+
+            if (options.EnableDevTools)
+                UI.LuminaDevTools.Register(options.DevToolsGesture);
+        });
     }
 
     public static AppBuilder AttachLuminaDevTools(

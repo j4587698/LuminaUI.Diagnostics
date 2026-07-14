@@ -13,19 +13,25 @@ public static class LuminaDevTools
     private static IDiagnosticsClient? s_sharedClient;
     private static DiagnosticsServices? s_standaloneServices;
 
+    private static bool _registered;
+
+    internal static void Register(KeyGesture? gesture = null)
+    {
+        if (_registered)
+            return;
+        _registered = true;
+
+        if (gesture != null)
+            s_gesture = gesture;
+
+        DiagnosticsLocalization.Register();
+        InputElement.KeyDownEvent.AddClassHandler<TopLevel>(OnKeyDown, RoutingStrategies.Tunnel);
+        HotReload.HotReloadManager.StartWatcher();
+    }
+
     public static AppBuilder AttachLuminaDevTools(this AppBuilder builder, KeyGesture? gesture = null)
     {
-        if (gesture != null)
-        {
-            s_gesture = gesture;
-        }
-
-        return builder.AfterSetup(_ =>
-        {
-            DiagnosticsLocalization.Register();
-            InputElement.KeyDownEvent.AddClassHandler<TopLevel>(OnKeyDown, RoutingStrategies.Tunnel);
-            HotReload.HotReloadManager.StartWatcher();
-        });
+        return builder.AfterSetup(_ => Register(gesture));
     }
 
     public static void SetSharedClient(IDiagnosticsClient client)

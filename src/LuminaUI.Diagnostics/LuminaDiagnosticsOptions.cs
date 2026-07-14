@@ -1,3 +1,4 @@
+using Avalonia.Input;
 using LuminaUI.Diagnostics.Abstractions;
 
 namespace LuminaUI.Diagnostics;
@@ -9,6 +10,10 @@ public sealed class LuminaUIDiagnosticsOptions
     public bool StartImmediately { get; set; } = true;
 
     public int DefaultTimeoutMs { get; set; } = LuminaUIDiagnosticsProtocol.DefaultTimeoutMs;
+
+    public bool EnableDevTools { get; set; }
+
+    public KeyGesture? DevToolsGesture { get; set; }
 
     public string ResolveDiagnosticsPipeName() =>
         string.IsNullOrWhiteSpace(DiagnosticsPipeName)
