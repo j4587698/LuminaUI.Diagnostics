@@ -1,0 +1,26 @@
+<Project>
+  <PropertyGroup>
+    <LuminaUIDiagnosticsVersion>0.1.2</LuminaUIDiagnosticsVersion>
+    <LuminaUIDiagnosticsMcpVersion>0.1.3</LuminaUIDiagnosticsMcpVersion>
+    <LuminaUIDiagnosticsAssemblyVersion>0.1.2.0</LuminaUIDiagnosticsAssemblyVersion>
+    <LuminaUIDiagnosticsMcpAssemblyVersion>0.1.3.0</LuminaUIDiagnosticsMcpAssemblyVersion>
+
+    <Version>$(LuminaUIDiagnosticsVersion)</Version>
+    <PackageVersion>$(LuminaUIDiagnosticsVersion)</PackageVersion>
+    <AssemblyVersion>$(LuminaUIDiagnosticsAssemblyVersion)</AssemblyVersion>
+    <FileVersion>$(LuminaUIDiagnosticsAssemblyVersion)</FileVersion>
+
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+
+    <Authors>LuminaUI Contributors</Authors>
+    <Company>LuminaUI</Company>
+    <Product>LuminaUI.Diagnostics</Product>
+    <PackageTags>Avalonia;UI;Diagnostics;MCP;LuminaUI</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+</Project>

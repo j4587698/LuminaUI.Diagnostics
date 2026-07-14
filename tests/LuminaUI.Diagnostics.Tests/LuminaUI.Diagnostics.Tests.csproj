@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\LuminaUI.Diagnostics.Abstractions\LuminaUI.Diagnostics.Abstractions.csproj" />
+    <ProjectReference Include="..\..\src\LuminaUI.Diagnostics\LuminaUI.Diagnostics.csproj" />
+    <ProjectReference Include="..\..\tools\LuminaUI.Diagnostics.Mcp\LuminaUI.Diagnostics.Mcp.csproj" />
+  </ItemGroup>
+
+</Project>

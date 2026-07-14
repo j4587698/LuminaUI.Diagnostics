@@ -1,0 +1,2120 @@
+<ui:LuminaWindow xmlns="https://github.com/avaloniaui"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:vm="using:LuminaUI.Diagnostics.UI.ViewModels"
+                 xmlns:ui="using:LuminaUI.Controls"
+                 xmlns:ctrl="using:LuminaUI.Diagnostics.UI.Controls"
+                 xmlns:l10n="clr-namespace:LuminaUI.Localization;assembly=LuminaUI"
+                 x:Class="LuminaUI.Diagnostics.UI.LuminaDevToolsWindow"
+                 Title="{l10n:Loc DevTools.Title}"
+                 Icon="avares://LuminaUI.Diagnostics/Assets/DevToolsIcon.png"
+                 Width="1280"
+                 Height="760"
+                 MinWidth="980"
+                 MinHeight="620"
+                 x:DataType="vm:LuminaDevToolsViewModel"
+                 UseWindowGlass="False"
+                 ContentBackground="#F3F5F8"
+                 Background="#F3F5F8">
+
+    <ui:LuminaWindow.Resources>
+        <SolidColorBrush x:Key="DevToolsWindowBackgroundBrush" Color="#F3F5F8" />
+        <SolidColorBrush x:Key="DevToolsSurfaceBrush" Color="#FFFFFF" />
+        <SolidColorBrush x:Key="DevToolsSurfaceMutedBrush" Color="#F7F8FA" />
+        <SolidColorBrush x:Key="DevToolsBorderBrush" Color="#DDE2EA" />
+        <SolidColorBrush x:Key="DevToolsBorderStrongBrush" Color="#BCC6D5" />
+        <SolidColorBrush x:Key="DevToolsTextBrush" Color="#202634" />
+        <SolidColorBrush x:Key="DevToolsTextMutedBrush" Color="#687386" />
+        <SolidColorBrush x:Key="DevToolsTextFaintBrush" Color="#9099A9" />
+        <SolidColorBrush x:Key="DevToolsAccentBrush" Color="#4F6BED" />
+        <SolidColorBrush x:Key="DevToolsAccentSoftBrush" Color="#EAF0FF" />
+        <SolidColorBrush x:Key="DevToolsSelectionBrush" Color="#E8EEFF" />
+        <SolidColorBrush x:Key="DevToolsSelectionBorderBrush" Color="#4F6BED" />
+        <SolidColorBrush x:Key="DevToolsHoverBrush" Color="#EEF1F6" />
+        <SolidColorBrush x:Key="DevToolsInputBrush" Color="#FAFBFC" />
+        <SolidColorBrush x:Key="DevToolsWarningBrush" Color="#B7791F" />
+        <SolidColorBrush x:Key="DevToolsWarningSoftBrush" Color="#FFF7E6" />
+        <SolidColorBrush x:Key="DevToolsErrorBrush" Color="#C4364F" />
+        <SolidColorBrush x:Key="DevToolsErrorSoftBrush" Color="#FFF0F2" />
+        <SolidColorBrush x:Key="DevToolsSuccessBrush" Color="#238564" />
+
+        <StreamGeometry x:Key="DevToolsRefreshIcon">M20,11 A8,8 0 1 0 17.7,16.7 M20,4 L20,11 L13,11</StreamGeometry>
+        <StreamGeometry x:Key="DevToolsResourcesIcon">M5,6 C5,4.9 8.1,4 12,4 C15.9,4 19,4.9 19,6 C19,7.1 15.9,8 12,8 C8.1,8 5,7.1 5,6 Z M5,6 L5,12 C5,13.1 8.1,14 12,14 C15.9,14 19,13.1 19,12 L19,6 M5,12 L5,18 C5,19.1 8.1,20 12,20 C15.9,20 19,19.1 19,18 L19,12</StreamGeometry>
+        <StreamGeometry x:Key="DevToolsBindingsIcon">M9.5,14.5 L14.5,9.5 M8.2,16.8 L6.7,18.3 C5.3,19.7 3.1,19.7 1.7,18.3 C0.3,16.9 0.3,14.7 1.7,13.3 L5.2,9.8 C6.6,8.4 8.8,8.4 10.2,9.8 M13.8,14.2 C15.2,15.6 17.4,15.6 18.8,14.2 L22.3,10.7 C23.7,9.3 23.7,7.1 22.3,5.7 C20.9,4.3 18.7,4.3 17.3,5.7 L15.8,7.2</StreamGeometry>
+        <StreamGeometry x:Key="DevToolsMetricsIcon">M5,20 L5,13 M12,20 L12,6 M19,20 L19,10 M3,20 L21,20</StreamGeometry>
+
+        <TreeDataTemplate x:Key="DevToolsTreeNodeTemplate"
+                          DataType="{x:Type vm:VisualTreeNodeViewModel}"
+                          x:DataType="vm:VisualTreeNodeViewModel"
+                          ItemsSource="{Binding Children}">
+            <Border Classes="tree-node"
+                    Classes.readonly="{Binding IsReadOnly}"
+                    Background="Transparent"
+                    ClipToBounds="True"
+                    ToolTip.Tip="{Binding DisplayText}"
+                    PointerEntered="OnNodePointerEntered"
+                    PointerExited="OnNodePointerExited">
+                <Grid ColumnDefinitions="Auto,*,*" ColumnSpacing="5">
+                    <TextBlock Grid.Column="0"
+                               Text="{Binding Type}"
+                               MaxWidth="150"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource DevToolsTextBrush}"
+                               TextTrimming="CharacterEllipsis"
+                               VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1"
+                               Text="{Binding DisplayName}"
+                               Foreground="{StaticResource DevToolsAccentBrush}"
+                               IsVisible="{Binding Name, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                               TextTrimming="CharacterEllipsis"
+                               VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="2"
+                               Text="{Binding DisplayClasses}"
+                               Foreground="{StaticResource DevToolsTextFaintBrush}"
+                               FontSize="12"
+                               IsVisible="{Binding Classes, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                               TextTrimming="CharacterEllipsis"
+                               VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+        </TreeDataTemplate>
+
+        <TreeDataTemplate x:Key="ResourceTreeNodeTemplate"
+                          DataType="{x:Type vm:ResourceTreeNodeViewModel}"
+                          x:DataType="vm:ResourceTreeNodeViewModel"
+                          ItemsSource="{Binding Children}">
+            <Grid ColumnDefinitions="*,Auto"
+                  ColumnSpacing="8"
+                  MinHeight="28"
+                  ToolTip.Tip="{Binding DisplayPath}">
+                <TextBlock Text="{Binding DisplayName}"
+                           Foreground="{StaticResource DevToolsTextBrush}"
+                           TextTrimming="CharacterEllipsis"
+                           VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1"
+                           Text="{Binding TotalCount}"
+                           Foreground="{StaticResource DevToolsTextFaintBrush}"
+                           FontSize="11"
+                           VerticalAlignment="Center" />
+            </Grid>
+        </TreeDataTemplate>
+
+        <DataTemplate x:Key="PropertyRowTemplate" x:DataType="vm:PropertyViewModel">
+            <Border Classes="property-row"
+                     HorizontalAlignment="Stretch"
+                     Classes.readonly="{Binding IsEditorDisabled}"
+                     Classes.set="{Binding IsSet}"
+                     Classes.error="{Binding HasError}"
+                     ToolTip.Tip="{Binding Error}">
+                <Grid ColumnDefinitions="2*,3*,32" MinHeight="42">
+                    <Border Grid.Column="0"
+                            Classes="property-name-cell">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="7">
+                            <Border Classes="property-set-marker"
+                                    IsVisible="{Binding IsSet}"
+                                    Width="4"
+                                    Height="16"
+                                    CornerRadius="2"
+                                    VerticalAlignment="Center" />
+                            <StackPanel Grid.Column="1"
+                                        Spacing="1"
+                                        VerticalAlignment="Center">
+                                <TextBlock Text="{Binding Name}"
+                                           ToolTip.Tip="{Binding PropertyType}"
+                                           Foreground="{StaticResource DevToolsTextBrush}"
+                                           FontSize="12"
+                                           FontWeight="Medium"
+                                           TextTrimming="CharacterEllipsis" />
+                                <TextBlock Text="{Binding ValueSourceDisplay}"
+                                           Classes="property-source"
+                                           Classes.local="{Binding IsSet}"
+                                           Foreground="{StaticResource DevToolsTextMutedBrush}"
+                                           FontSize="9"
+                                           IsVisible="{Binding ShowValueSource}"
+                                           TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                    <Border Grid.Column="1" Padding="8,4">
+                        <ctrl:PropertyValueEditor DataContext="{Binding}"
+                                                  VerticalAlignment="Center"
+                                                  HorizontalAlignment="Stretch" />
+                    </Border>
+                    <Grid Grid.Column="2">
+                        <TextBlock Text="!"
+                                   Foreground="{StaticResource DevToolsErrorBrush}"
+                                   FontSize="12"
+                                   FontWeight="Bold"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   IsVisible="{Binding HasError}"
+                                   ToolTip.Tip="{Binding Error}" />
+                        <Button Classes="property-clear-button"
+                                Command="{Binding ClearLocalValueCommand}"
+                                IsVisible="{Binding CanClearLocalValue}"
+                                ToolTip.Tip="{l10n:Loc DevTools.Property.ClearLocalValue}">
+                            <Viewbox Width="13" Height="13">
+                                <Canvas Width="24" Height="24">
+                                    <Path Fill="Transparent"
+                                          Stroke="{Binding $parent[Button].Foreground}"
+                                          StrokeThickness="1.8"
+                                          StrokeLineCap="Round"
+                                          StrokeJoin="Round"
+                                          Data="M7,5 L18,16 M10,18 L6,14 C5,13 5,12 6,11 L12,5 C13,4 14,4 15,5 L19,9 C20,10 20,11 19,12 L13,18 Z M10,18 L18,18" />
+                                </Canvas>
+                            </Viewbox>
+                        </Button>
+                    </Grid>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="PropertyGroupTemplate" x:DataType="vm:PropertyGroupViewModel">
+            <Expander Classes="property-group"
+                      HorizontalAlignment="Stretch"
+                      IsExpanded="True"
+                      Padding="0"
+                      Margin="0"
+                      BorderThickness="0"
+                      Background="Transparent">
+                <Expander.Header>
+                    <Grid ColumnDefinitions="*,Auto" MinHeight="32">
+                        <TextBlock Text="{Binding Display}"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource DevToolsTextBrush}"
+                                   VerticalAlignment="Center" />
+                        <Border Grid.Column="1"
+                                Classes="group-count">
+                            <TextBlock Text="{Binding Count}"
+                                       FontSize="12"
+                                       Foreground="{StaticResource DevToolsTextMutedBrush}"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Center" />
+                        </Border>
+                    </Grid>
+                </Expander.Header>
+                <ItemsControl ItemsSource="{Binding Properties}"
+                              HorizontalAlignment="Stretch"
+                              ItemTemplate="{StaticResource PropertyRowTemplate}" />
+            </Expander>
+        </DataTemplate>
+
+        <DataTemplate x:Key="ResourceEntryTemplate" x:DataType="vm:ResourceEntryViewModel">
+            <Border Classes="data-row" ToolTip.Tip="{Binding Error}">
+                <Grid ColumnDefinitions="1.45*,0.7*,1.25*,2.1*" MinHeight="42" ColumnSpacing="16">
+                    <TextBlock Text="{Binding Key}"
+                               Foreground="{StaticResource DevToolsTextBrush}"
+                               FontWeight="Medium"
+                               TextTrimming="CharacterEllipsis"
+                               VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1"
+                               Text="{Binding Kind}"
+                               Foreground="{StaticResource DevToolsTextMutedBrush}"
+                               TextTrimming="CharacterEllipsis"
+                               VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="2"
+                               Text="{Binding ValueType}"
+                               Foreground="{StaticResource DevToolsTextMutedBrush}"
+                               TextTrimming="CharacterEllipsis"
+                               VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="3"
+                               Text="{Binding Value}"
+                               ToolTip.Tip="{Binding Value}"
+                               Foreground="{StaticResource DevToolsTextMutedBrush}"
+                               TextTrimming="CharacterEllipsis"
+                               VerticalAlignment="Center"
+                               IsVisible="{Binding !CanEdit}" />
+                    <Grid Grid.Column="3"
+                          ColumnDefinitions="*,32"
+                          ColumnSpacing="6"
+                          IsVisible="{Binding CanEdit}">
+                        <TextBox Text="{Binding EditValue, Mode=TwoWay}"
+                                 MinHeight="30"
+                                 FontSize="11"
+                                 VerticalAlignment="Center" />
+                        <Button Grid.Column="1"
+                                Classes="ghost-icon-button"
+                                Command="{Binding ApplyCommand}"
+                                IsVisible="{Binding CanEdit}"
+                                Content="✓"
+                                ToolTip.Tip="{l10n:Loc DevTools.Resource.Apply}" />
+                    </Grid>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="BindingErrorTemplate" x:DataType="vm:BindingErrorEntryViewModel">
+            <Border Classes="data-row binding-issue"
+                    Classes.error="{Binding IsError}"
+                    Classes.warning="{Binding IsWarning}">
+                <Grid ColumnDefinitions="76,68,132,*" MinHeight="40" ColumnSpacing="10">
+                    <TextBlock Text="{Binding DisplayTime}"
+                               Foreground="{StaticResource DevToolsTextMutedBrush}"
+                               VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1"
+                               Text="{Binding Level}"
+                               Classes="binding-level"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="2"
+                               Text="{Binding SourceType}"
+                               Foreground="{StaticResource DevToolsTextMutedBrush}"
+                               TextTrimming="CharacterEllipsis"
+                               VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="3"
+                               Text="{Binding Message}"
+                               Foreground="{StaticResource DevToolsTextBrush}"
+                               TextTrimming="CharacterEllipsis"
+                               ToolTip.Tip="{Binding Message}"
+                               VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="StyleEntryTemplate" x:DataType="vm:StyleEntryViewModel">
+            <Border Classes="inspector-row">
+                <StackPanel Spacing="3">
+                    <TextBlock Text="{Binding Selector}"
+                               Foreground="{StaticResource DevToolsTextBrush}"
+                               FontSize="12"
+                               FontWeight="SemiBold"
+                               TextTrimming="CharacterEllipsis"
+                               IsVisible="{Binding Selector, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                    <TextBlock Text="{Binding DisplayType}"
+                               Foreground="{StaticResource DevToolsTextFaintBrush}"
+                               FontSize="10"
+                               TextTrimming="CharacterEllipsis" />
+                    <ItemsControl ItemsSource="{Binding Setters}"
+                                  IsVisible="{Binding HasSetters}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="x:String">
+                                <TextBlock Text="{Binding}"
+                                           Foreground="{StaticResource DevToolsTextMutedBrush}"
+                                           FontSize="10"
+                                           TextTrimming="CharacterEllipsis" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="MetricItemTemplate" x:DataType="vm:MetricItemViewModel">
+            <Border Classes="metric-row">
+                <Grid ColumnDefinitions="112,*,Auto" ColumnSpacing="12">
+                    <TextBlock Text="{Binding Group}"
+                               Foreground="{StaticResource DevToolsTextFaintBrush}"
+                               FontSize="10"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1"
+                               Text="{Binding Name}"
+                               Foreground="{StaticResource DevToolsTextBrush}"
+                               FontSize="12"
+                               VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="2"
+                               Text="{Binding Value}"
+                               Foreground="{StaticResource DevToolsTextBrush}"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </ui:LuminaWindow.Resources>
+
+    <ui:LuminaWindow.Styles>
+        <Style Selector="TextBlock">
+            <Setter Property="FontFamily" Value="Inter, Segoe UI, Arial" />
+        </Style>
+
+        <Style Selector="Border.panel">
+            <Setter Property="Background" Value="{StaticResource DevToolsSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource DevToolsBorderBrush}" />
+        </Style>
+
+        <Style Selector="Button.title-tool-button">
+            <Setter Property="Width" Value="34" />
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Foreground" Value="{StaticResource DevToolsTextMutedBrush}" />
+        </Style>
+        <Style Selector="Button.title-tool-button:pointerover">
+            <Setter Property="Background" Value="{StaticResource DevToolsHoverBrush}" />
+            <Setter Property="Foreground" Value="{StaticResource DevToolsTextBrush}" />
+        </Style>
+        <Style Selector="ToggleButton.title-tool-button">
+            <Setter Property="Width" Value="34" />
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Foreground" Value="{StaticResource DevToolsTextMutedBrush}" />
+        </Style>
+        <Style Selector="ToggleButton.title-tool-button:pointerover">
+            <Setter Property="Background" Value="{StaticResource DevToolsHoverBrush}" />
+            <Setter Property="Foreground" Value="{StaticResource DevToolsTextBrush}" />
+        </Style>
+        <Style Selector="ToggleButton.title-tool-button:checked">
+            <Setter Property="Background" Value="{StaticResource DevToolsAccentSoftBrush}" />
+            <Setter Property="Foreground" Value="{StaticResource DevToolsAccentBrush}" />
+        </Style>
+
+        <Style Selector="Button.nav-button">
+            <Setter Property="Width" Value="38" />
+            <Setter Property="Height" Value="38" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Foreground" Value="{StaticResource DevToolsTextMutedBrush}" />
+        </Style>
+        <Style Selector="Button.nav-button:pointerover">
+            <Setter Property="Background" Value="{StaticResource DevToolsHoverBrush}" />
+            <Setter Property="Foreground" Value="{StaticResource DevToolsTextBrush}" />
+        </Style>
+        <Style Selector="Button.nav-button.active">
+            <Setter Property="Background" Value="{StaticResource DevToolsAccentSoftBrush}" />
+            <Setter Property="Foreground" Value="{StaticResource DevToolsAccentBrush}" />
+        </Style>
+
+        <Style Selector="Button.ghost-icon-button">
+            <Setter Property="Width" Value="30" />
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="CornerRadius" Value="5" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Foreground" Value="{StaticResource DevToolsTextMutedBrush}" />
+        </Style>
+        <Style Selector="Button.ghost-icon-button:pointerover">
+            <Setter Property="Background" Value="{StaticResource DevToolsHoverBrush}" />
+            <Setter Property="Foreground" Value="{StaticResource DevToolsTextBrush}" />
+        </Style>
+
+        <Style Selector="Button.inspector-tab">
+            <Setter Property="Padding" Value="9,5" />
+            <Setter Property="MinHeight" Value="28" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Foreground" Value="{StaticResource DevToolsTextFaintBrush}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style Selector="Button.inspector-tab:pointerover">
+            <Setter Property="Background" Value="{StaticResource DevToolsHoverBrush}" />
+            <Setter Property="Foreground" Value="{StaticResource DevToolsTextBrush}" />
+        </Style>
+        <Style Selector="Button.inspector-tab.active">
+            <Setter Property="Background" Value="{StaticResource DevToolsSelectionBrush}" />
+            <Setter Property="Foreground" Value="{StaticResource DevToolsTextBrush}" />
+        </Style>
+
+        <Style Selector="TabControl.devtool-tabs">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="TabControl.devtool-tabs > TabItem">
+            <Setter Property="Padding" Value="16,7" />
+            <Setter Property="Margin" Value="2,2,0,4" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="CornerRadius" Value="5" />
+            <Setter Property="Background" Value="{StaticResource DevToolsSurfaceMutedBrush}" />
+            <Setter Property="Foreground" Value="{StaticResource DevToolsTextMutedBrush}" />
+        </Style>
+        <Style Selector="TabControl.devtool-tabs > TabItem:selected">
+            <Setter Property="Background" Value="{StaticResource DevToolsSurfaceBrush}" />
+            <Setter Property="Foreground" Value="{StaticResource DevToolsAccentBrush}" />
+        </Style>
+
+        <Style Selector="TreeView.devtool-tree">
+            <Setter Property="Background" Value="{StaticResource DevToolsSurfaceMutedBrush}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="5,4,3,6" />
+        </Style>
+        <Style Selector="TreeView.devtool-tree TreeViewItem">
+            <Setter Property="IsExpanded" Value="{ReflectionBinding IsExpanded}" />
+            <Setter Property="IsSelected" Value="{ReflectionBinding IsSelected, Mode=TwoWay}" />
+            <Setter Property="MinHeight" Value="28" />
+            <Setter Property="Margin" Value="0,1" />
+            <Setter Property="CornerRadius" Value="4" />
+        </Style>
+        <Style Selector="TreeView.devtool-tree TreeViewItem:selected">
+            <Setter Property="Background" Value="{StaticResource DevToolsSelectionBrush}" />
+            <Setter Property="Foreground" Value="{StaticResource DevToolsTextBrush}" />
+        </Style>
+        <Style Selector="TreeView.devtool-tree TreeViewItem:selected /template/ Border#PART_LayoutRoot">
+            <Setter Property="Background" Value="{StaticResource DevToolsSelectionBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource DevToolsSelectionBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="4" />
+        </Style>
+        <Style Selector="TreeView.resource-tree TreeViewItem:pointerover">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="TreeView.resource-tree TreeViewItem">
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Transitions" Value="{x:Null}" />
+        </Style>
+        <Style Selector="TreeView.resource-tree TreeViewItem /template/ Border#PART_LayoutRoot">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Transitions" Value="{x:Null}" />
+        </Style>
+        <Style Selector="TreeView.resource-tree TreeViewItem:pointerover /template/ Border#PART_LayoutRoot">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+        <Style Selector="TreeView.resource-tree TreeViewItem:selected">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{StaticResource DevToolsTextBrush}" />
+        </Style>
+        <Style Selector="TreeView.resource-tree TreeViewItem:selected /template/ Border#PART_LayoutRoot">
+            <Setter Property="Background" Value="#E9EDF4" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="CornerRadius" Value="3" />
+        </Style>
+        <Style Selector="TreeView.resource-tree TreeViewItem:selected:pointerover /template/ Border#PART_LayoutRoot">
+            <Setter Property="Background" Value="#E9EDF4" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="CornerRadius" Value="3" />
+        </Style>
+        <Style Selector="TreeView.resource-tree ToggleButton#PART_ExpandCollapseChevron">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Transitions" Value="{x:Null}" />
+        </Style>
+        <Style Selector="TreeView.resource-tree ToggleButton#PART_ExpandCollapseChevron:pointerover">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="Border.tree-node">
+            <Setter Property="MinHeight" Value="27" />
+            <Setter Property="Padding" Value="5,2" />
+            <Setter Property="CornerRadius" Value="4" />
+        </Style>
+        <Style Selector="Border.tree-node:pointerover">
+            <Setter Property="Background" Value="{StaticResource DevToolsHoverBrush}" />
+        </Style>
+        <Style Selector="Border.tree-node.readonly">
+            <Setter Property="Opacity" Value="0.64" />
+        </Style>
+
+        <Style Selector="ComboBox.devtool-toolbar-combo">
+            <Setter Property="MinWidth" Value="132" />
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Padding" Value="9,3" />
+            <Setter Property="CornerRadius" Value="5" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{StaticResource DevToolsTextBrush}" />
+        </Style>
+        <Style Selector="ComboBox.devtool-toolbar-combo:pointerover">
+            <Setter Property="Background" Value="{StaticResource DevToolsHoverBrush}" />
+        </Style>
+
+        <Style Selector="TextBox.devtool-search">
+            <Setter Property="Width" Value="180" />
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Padding" Value="8,3" />
+            <Setter Property="CornerRadius" Value="5" />
+            <Setter Property="BorderBrush" Value="{StaticResource DevToolsBorderBrush}" />
+            <Setter Property="Background" Value="{StaticResource DevToolsSurfaceMutedBrush}" />
+            <Setter Property="Foreground" Value="{StaticResource DevToolsTextBrush}" />
+            <Setter Property="WatermarkForeground" Value="{StaticResource DevToolsTextFaintBrush}" />
+        </Style>
+        <Style Selector="TextBox.devtool-search:focus">
+            <Setter Property="BorderBrush" Value="{StaticResource DevToolsSelectionBorderBrush}" />
+            <Setter Property="Background" Value="{StaticResource DevToolsSurfaceBrush}" />
+        </Style>
+
+        <Style Selector="Expander.property-group /template/ ToggleButton#PART_toggle">
+            <Setter Property="Padding" Value="18,6,12,4" />
+            <Setter Property="Background" Value="{StaticResource DevToolsWindowBackgroundBrush}" />
+            <Setter Property="Foreground" Value="{StaticResource DevToolsTextBrush}" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+        <Style Selector="Expander.property-group /template/ ToggleButton#PART_toggle:pointerover">
+            <Setter Property="Background" Value="{StaticResource DevToolsHoverBrush}" />
+        </Style>
+        <Style Selector="Expander.property-group /template/ Border#PART_LayoutRoot">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+        <Style Selector="Expander.property-group /template/ Border">
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+        <Style Selector="Border.group-count">
+            <Setter Property="MinWidth" Value="24" />
+            <Setter Property="Height" Value="18" />
+            <Setter Property="Padding" Value="6,0" />
+            <Setter Property="CornerRadius" Value="9" />
+            <Setter Property="Background" Value="#E8ECF2" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+
+        <Style Selector="Border.property-row">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Margin" Value="8,1" />
+        </Style>
+        <Style Selector="Border.property-row:pointerover">
+            <Setter Property="Background" Value="{StaticResource DevToolsHoverBrush}" />
+        </Style>
+        <Style Selector="Border.property-row:focus-within">
+            <Setter Property="Background" Value="{StaticResource DevToolsSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource DevToolsSelectionBorderBrush}" />
+        </Style>
+        <Style Selector="Border.property-row.readonly">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="Border.property-row.error">
+            <Setter Property="Background" Value="{StaticResource DevToolsErrorSoftBrush}" />
+        </Style>
+        <Style Selector="Border.property-name-cell">
+            <Setter Property="Padding" Value="12,0,8,0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+        <Style Selector="Border.property-set-marker">
+            <Setter Property="Background" Value="{StaticResource DevToolsSelectionBorderBrush}" />
+        </Style>
+        <Style Selector="TextBlock.property-source.local">
+            <Setter Property="Foreground" Value="{StaticResource DevToolsAccentBrush}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style Selector="Button.property-clear-button">
+            <Setter Property="Width" Value="26" />
+            <Setter Property="Height" Value="26" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Foreground" Value="{StaticResource DevToolsTextFaintBrush}" />
+        </Style>
+        <Style Selector="Button.property-clear-button:pointerover">
+            <Setter Property="Background" Value="{StaticResource DevToolsHoverBrush}" />
+            <Setter Property="Foreground" Value="{StaticResource DevToolsErrorBrush}" />
+        </Style>
+
+        <Style Selector="Border.inspector-card">
+            <Setter Property="CornerRadius" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="6" />
+        </Style>
+        <Style Selector="Border.inspector-card.compact">
+            <Setter Property="Padding" Value="8" />
+        </Style>
+        <Style Selector="Border.settings-card">
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Background" Value="{StaticResource DevToolsSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource DevToolsBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="20,16" />
+        </Style>
+        <Style Selector="TextBlock.settings-section-title">
+            <Setter Property="Foreground" Value="{StaticResource DevToolsTextBrush}" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Margin" Value="2,10,0,-4" />
+        </Style>
+        <Style Selector="Grid.settings-form">
+            <Setter Property="ColumnSpacing" Value="28" />
+            <Setter Property="RowSpacing" Value="12" />
+        </Style>
+        <Style Selector="Grid.settings-form TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Grid.settings-form ComboBox">
+            <Setter Property="MinHeight" Value="32" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+        </Style>
+        <Style Selector="Grid.settings-form TextBox">
+            <Setter Property="MinHeight" Value="32" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+        </Style>
+        <Style Selector="Grid.settings-form NumericUpDown">
+            <Setter Property="MinHeight" Value="32" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+        </Style>
+        <Style Selector="Grid.settings-form CheckBox">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+        </Style>
+        <Style Selector="Border.inspector-row">
+            <Setter Property="Background" Value="{StaticResource DevToolsSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource DevToolsBorderBrush}" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+            <Setter Property="Padding" Value="8,7" />
+        </Style>
+        <Style Selector="Border.inspector-row.binding-inspector-issue">
+            <Setter Property="Background" Value="{StaticResource DevToolsWarningSoftBrush}" />
+            <Setter Property="BorderBrush" Value="#EACB91" />
+        </Style>
+        <Style Selector="Border.inspector-section-title">
+            <Setter Property="Padding" Value="3,7" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="{StaticResource DevToolsBorderBrush}" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+        </Style>
+        <Style Selector="Border.empty-state">
+            <Setter Property="Padding" Value="20" />
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="Border.data-row">
+            <Setter Property="Background" Value="{StaticResource DevToolsSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="#EEF2F7" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+            <Setter Property="Padding" Value="12,0" />
+        </Style>
+        <Style Selector="Border.data-row:pointerover">
+            <Setter Property="Background" Value="#FBFCFF" />
+        </Style>
+        <Style Selector="ListBox.virtualized-data-list">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+        </Style>
+        <Style Selector="ListBox.virtualized-data-list > ListBoxItem">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        </Style>
+        <Style Selector="ListBox.virtualized-data-list > ListBoxItem:selected /template/ Border#PART_LayoutRoot">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+        <Style Selector="Border.data-row.binding-issue.warning">
+            <Setter Property="Background" Value="{StaticResource DevToolsWarningSoftBrush}" />
+            <Setter Property="BorderBrush" Value="#EACB91" />
+        </Style>
+        <Style Selector="Border.data-row.binding-issue.error">
+            <Setter Property="Background" Value="{StaticResource DevToolsErrorSoftBrush}" />
+            <Setter Property="BorderBrush" Value="#E6A8B2" />
+        </Style>
+        <Style Selector="Border.data-row.binding-issue.warning TextBlock.binding-level">
+            <Setter Property="Foreground" Value="{StaticResource DevToolsWarningBrush}" />
+        </Style>
+        <Style Selector="Border.data-row.binding-issue.error TextBlock.binding-level">
+            <Setter Property="Foreground" Value="{StaticResource DevToolsErrorBrush}" />
+        </Style>
+        <Style Selector="Border.table-header">
+            <Setter Property="Background" Value="{StaticResource DevToolsSurfaceMutedBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource DevToolsBorderBrush}" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+            <Setter Property="Padding" Value="12,0" />
+        </Style>
+        <Style Selector="Border.metric-row">
+            <Setter Property="MinHeight" Value="40" />
+            <Setter Property="Background" Value="{StaticResource DevToolsSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource DevToolsBorderBrush}" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+            <Setter Property="Padding" Value="12,0" />
+        </Style>
+
+        <Style Selector="TextBox.devtool-value">
+            <Setter Property="MinWidth" Value="0" />
+            <Setter Property="MinHeight" Value="28" />
+            <Setter Property="Padding" Value="8,3" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{StaticResource DevToolsTextBrush}" />
+            <Setter Property="WatermarkForeground" Value="{StaticResource DevToolsTextFaintBrush}" />
+        </Style>
+        <Style Selector="TextBox.devtool-value:focus">
+            <Setter Property="BorderBrush" Value="{StaticResource DevToolsSelectionBorderBrush}" />
+            <Setter Property="Background" Value="{StaticResource DevToolsSurfaceBrush}" />
+        </Style>
+        <Style Selector="TextBox.devtool-value:pointerover">
+            <Setter Property="Background" Value="{StaticResource DevToolsSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource DevToolsBorderBrush}" />
+        </Style>
+        <Style Selector="TextBox.devtool-value.error">
+            <Setter Property="BorderBrush" Value="#E15B64" />
+            <Setter Property="Foreground" Value="#B4232D" />
+        </Style>
+        <Style Selector="ComboBox.devtool-value">
+            <Setter Property="MinWidth" Value="0" />
+            <Setter Property="MinHeight" Value="28" />
+            <Setter Property="Padding" Value="8,3" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{StaticResource DevToolsTextBrush}" />
+        </Style>
+        <Style Selector="ComboBox.devtool-value:pointerover">
+            <Setter Property="Background" Value="{StaticResource DevToolsSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource DevToolsBorderBrush}" />
+        </Style>
+        <Style Selector="ComboBox.devtool-value:focus">
+            <Setter Property="Background" Value="{StaticResource DevToolsSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource DevToolsSelectionBorderBrush}" />
+        </Style>
+        <Style Selector="NumericUpDown.devtool-value">
+            <Setter Property="MinWidth" Value="0" />
+            <Setter Property="MinHeight" Value="28" />
+            <Setter Property="Padding" Value="8,3" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{StaticResource DevToolsTextBrush}" />
+        </Style>
+        <Style Selector="NumericUpDown.devtool-value:pointerover">
+            <Setter Property="Background" Value="{StaticResource DevToolsSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource DevToolsBorderBrush}" />
+        </Style>
+        <Style Selector="NumericUpDown.devtool-value:focus">
+            <Setter Property="Background" Value="{StaticResource DevToolsSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource DevToolsSelectionBorderBrush}" />
+        </Style>
+        <Style Selector="Border.devtool-compound">
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="Border.devtool-compound:pointerover">
+            <Setter Property="Background" Value="{StaticResource DevToolsSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource DevToolsBorderBrush}" />
+        </Style>
+        <Style Selector="Border.devtool-compound-divider">
+            <Setter Property="Background" Value="{StaticResource DevToolsBorderBrush}" />
+        </Style>
+        <Style Selector="TextBlock.devtool-axis-label">
+            <Setter Property="Foreground" Value="{StaticResource DevToolsTextFaintBrush}" />
+        </Style>
+        <Style Selector="TextBlock.devtool-color-value">
+            <Setter Property="Foreground" Value="{StaticResource DevToolsTextMutedBrush}" />
+        </Style>
+        <Style Selector="Border.devtool-readonly-value">
+            <Setter Property="MinHeight" Value="28" />
+            <Setter Property="Padding" Value="8,3" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="Background" Value="#E8ECF2" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+        <Style Selector="TextBlock.devtool-readonly-text">
+            <Setter Property="Foreground" Value="{StaticResource DevToolsTextFaintBrush}" />
+        </Style>
+        <Style Selector="TextBlock.devtool-status.error">
+            <Setter Property="Foreground" Value="{StaticResource DevToolsErrorBrush}" />
+        </Style>
+        <Style Selector="Border.status-bar.error">
+            <Setter Property="Background" Value="{StaticResource DevToolsErrorSoftBrush}" />
+        </Style>
+        <Style Selector="Ellipse.connection-state">
+            <Setter Property="Fill" Value="{StaticResource DevToolsSuccessBrush}" />
+        </Style>
+        <Style Selector="Ellipse.connection-state.error">
+            <Setter Property="Fill" Value="{StaticResource DevToolsErrorBrush}" />
+        </Style>
+        <Style Selector="Border.devtool-color-preview">
+            <Setter Property="Width" Value="20" />
+            <Setter Property="Height" Value="20" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="BorderBrush" Value="{StaticResource DevToolsBorderStrongBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+    </ui:LuminaWindow.Styles>
+
+    <ui:LuminaWindow.TitleBarLeftContent>
+        <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+            <Image Width="22"
+                   Height="22"
+                   Source="avares://LuminaUI.Diagnostics/Assets/DevToolsIcon.png" />
+            <TextBlock Text="{l10n:Loc DevTools.Title}"
+                       Foreground="{StaticResource DevToolsTextBrush}"
+                       FontSize="13"
+                       FontWeight="SemiBold"
+                       VerticalAlignment="Center" />
+        </StackPanel>
+    </ui:LuminaWindow.TitleBarLeftContent>
+
+    <ui:LuminaWindow.TitleBarRightContent>
+        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+            <ToggleButton Classes="title-tool-button"
+                          IsChecked="{Binding IsPicking, Mode=TwoWay}"
+                           ToolTip.Tip="{l10n:Loc DevTools.Toolbar.PickElement}">
+                <Viewbox Width="16" Height="16">
+                    <Canvas Width="24" Height="24">
+                        <Path Fill="{Binding $parent[Button].Foreground}"
+                              Data="M4,3 L19,10.5 L12.6,12.8 L10.5,19 Z" />
+                    </Canvas>
+                </Viewbox>
+            </ToggleButton>
+            <Button Classes="title-tool-button"
+                    Command="{Binding RefreshCommand}"
+                    ToolTip.Tip="{l10n:Loc DevTools.Toolbar.Refresh}">
+                <Viewbox Width="16" Height="16">
+                    <Canvas Width="24" Height="24">
+                        <Path Fill="Transparent"
+                              Stroke="{Binding $parent[Button].Foreground}"
+                              StrokeThickness="1.8"
+                              StrokeLineCap="Round"
+                              StrokeJoin="Round"
+                              Data="{StaticResource DevToolsRefreshIcon}" />
+                    </Canvas>
+                </Viewbox>
+            </Button>
+        </StackPanel>
+    </ui:LuminaWindow.TitleBarRightContent>
+
+    <Grid RowDefinitions="*,24"
+          Background="{StaticResource DevToolsWindowBackgroundBrush}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="54" />
+            <ColumnDefinition Width="2*" MinWidth="230" MaxWidth="360" />
+            <ColumnDefinition Width="4" />
+            <ColumnDefinition Width="4*" MinWidth="420" />
+            <ColumnDefinition Width="4" />
+            <ColumnDefinition Width="2.2*" MinWidth="300" MaxWidth="440" />
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Column="0"
+                Background="{StaticResource DevToolsSurfaceBrush}"
+                BorderBrush="{StaticResource DevToolsBorderBrush}"
+                BorderThickness="0,0,1,0">
+            <Grid RowDefinitions="Auto,*,Auto" Margin="0,6">
+                <StackPanel Spacing="4" HorizontalAlignment="Center">
+                    <Button x:Name="ElementsNavButton"
+                            Classes="nav-button"
+                            Classes.active="{Binding IsElementsSection}"
+                            Command="{Binding SelectSectionCommand}"
+                            CommandParameter="Elements"
+                            ToolTip.Tip="{l10n:Loc DevTools.Section.Elements}">
+                        <Viewbox Width="18" Height="18">
+                            <Canvas Width="24" Height="24">
+                                <Path Fill="Transparent"
+                                      Stroke="{Binding $parent[Button].Foreground}"
+                                      StrokeThickness="1.8"
+                                      StrokeJoin="Round"
+                                      Data="M4,4 L10,4 L10,10 L4,10 Z M14,4 L20,4 L20,10 L14,10 Z M4,14 L10,14 L10,20 L4,20 Z M14,14 L20,14 L20,20 L14,20 Z" />
+                            </Canvas>
+                        </Viewbox>
+                    </Button>
+                    <Button x:Name="ResourcesNavButton"
+                            Classes="nav-button"
+                            Classes.active="{Binding IsResourcesSection}"
+                            Command="{Binding SelectSectionCommand}"
+                            CommandParameter="Resources"
+                            ToolTip.Tip="{l10n:Loc DevTools.Section.Resources}">
+                        <Viewbox Width="18" Height="18">
+                            <Canvas Width="24" Height="24">
+                                <Path Fill="Transparent"
+                                      Stroke="{Binding $parent[Button].Foreground}"
+                                      StrokeThickness="1.8"
+                                      StrokeLineCap="Round"
+                                      StrokeJoin="Round"
+                                      Data="{StaticResource DevToolsResourcesIcon}" />
+                            </Canvas>
+                        </Viewbox>
+                    </Button>
+                    <Button x:Name="BindingsNavButton"
+                            Classes="nav-button"
+                            Classes.active="{Binding IsBindingsSection}"
+                            Command="{Binding SelectSectionCommand}"
+                            CommandParameter="Bindings"
+                            ToolTip.Tip="{l10n:Loc DevTools.Section.Bindings}">
+                        <Viewbox Width="18" Height="18">
+                            <Canvas Width="24" Height="24">
+                                <Path Fill="Transparent"
+                                      Stroke="{Binding $parent[Button].Foreground}"
+                                      StrokeThickness="1.8"
+                                      StrokeLineCap="Round"
+                                      StrokeJoin="Round"
+                                      Data="{StaticResource DevToolsBindingsIcon}" />
+                            </Canvas>
+                        </Viewbox>
+                    </Button>
+                    <Button x:Name="MetricsNavButton"
+                            Classes="nav-button"
+                            Classes.active="{Binding IsMetricsSection}"
+                            Command="{Binding SelectSectionCommand}"
+                            CommandParameter="Metrics"
+                            ToolTip.Tip="{l10n:Loc DevTools.Section.Metrics}">
+                        <Viewbox Width="18" Height="18">
+                            <Canvas Width="24" Height="24">
+                                <Path Fill="Transparent"
+                                      Stroke="{Binding $parent[Button].Foreground}"
+                                      StrokeThickness="1.8"
+                                      StrokeLineCap="Round"
+                                      StrokeJoin="Round"
+                                      Data="{StaticResource DevToolsMetricsIcon}" />
+                            </Canvas>
+                        </Viewbox>
+                    </Button>
+                    <Button x:Name="AssetsNavButton"
+                            Classes="nav-button"
+                            Classes.active="{Binding IsAssetsSection}"
+                            Command="{Binding SelectSectionCommand}"
+                            CommandParameter="Assets"
+                            ToolTip.Tip="{l10n:Loc DevTools.Section.Assets}">
+                        <Viewbox Width="18" Height="18">
+                            <Canvas Width="24" Height="24">
+                                <Path Fill="Transparent"
+                                      Stroke="{Binding $parent[Button].Foreground}"
+                                      StrokeThickness="1.8"
+                                      StrokeJoin="Round"
+                                      Data="M5,3 L14,3 L19,8 L19,21 L5,21 Z M14,3 L14,8 L19,8 M8,16 L11,13 L13,15 L15,12 L18,16" />
+                            </Canvas>
+                        </Viewbox>
+                    </Button>
+                    <Button x:Name="SettingsNavButton"
+                            Classes="nav-button"
+                            Classes.active="{Binding IsSettingsSection}"
+                            Command="{Binding SelectSectionCommand}"
+                            CommandParameter="Settings"
+                            ToolTip.Tip="{l10n:Loc DevTools.Section.Settings}">
+                        <Viewbox Width="18" Height="18">
+                            <Canvas Width="24" Height="24">
+                                <Path Fill="Transparent"
+                                      Stroke="{Binding $parent[Button].Foreground}"
+                                      StrokeThickness="1.8"
+                                      StrokeLineCap="Round"
+                                      StrokeJoin="Round"
+                                      Data="M12,8 A4,4 0 1 0 12,16 A4,4 0 1 0 12,8 M19,12 L22,12 M2,12 L5,12 M12,2 L12,5 M12,19 L12,22 M17,7 L19,5 M5,19 L7,17 M17,17 L19,19 M5,5 L7,7" />
+                            </Canvas>
+                        </Viewbox>
+                    </Button>
+                </StackPanel>
+
+                <Border Grid.Row="2"
+                        Width="28"
+                        Height="28"
+                        Background="Transparent"
+                        HorizontalAlignment="Center"
+                        ToolTip.Tip="{Binding ConnectionStatusText}">
+                    <Ellipse Width="8"
+                             Height="8"
+                             Fill="{StaticResource DevToolsSuccessBrush}"
+                             HorizontalAlignment="Center"
+                             VerticalAlignment="Center" />
+                </Border>
+            </Grid>
+        </Border>
+
+        <Border Grid.Column="1"
+                Classes="panel"
+                BorderThickness="0,0,1,0">
+            <Grid RowDefinitions="44,*">
+                <Grid Grid.Row="0"
+                      ColumnDefinitions="*,Auto"
+                      Margin="12,0,8,0">
+                    <TextBlock Text="{l10n:Loc DevTools.Section.Elements}"
+                               Foreground="{StaticResource DevToolsTextBrush}"
+                               FontSize="12"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center" />
+                    <StackPanel Grid.Column="1"
+                                Orientation="Horizontal"
+                                Spacing="6"
+                                VerticalAlignment="Center">
+                        <ToggleButton Classes="title-tool-button"
+                                      IsChecked="{Binding IsPicking, Mode=TwoWay}"
+                                      ToolTip.Tip="{l10n:Loc DevTools.Toolbar.PickElement}">
+                            <Viewbox Width="16" Height="16">
+                                <Canvas Width="24" Height="24">
+                                    <Path Fill="Transparent"
+                                          Stroke="{Binding $parent[Button].Foreground}"
+                                          StrokeThickness="1.8"
+                                          Data="M12,4 A8,8 0 1 0 12,20 A8,8 0 1 0 12,4 M12,8 A4,4 0 1 0 12,16 A4,4 0 1 0 12,8 M12,1 L12,5 M12,19 L12,23 M1,12 L5,12 M19,12 L23,12" />
+                                </Canvas>
+                            </Viewbox>
+                        </ToggleButton>
+                    </StackPanel>
+                </Grid>
+
+                <TabControl Grid.Row="1"
+                            Classes="devtool-tabs"
+                            SelectedIndex="{Binding SelectedTreeTabIndex, Mode=TwoWay}"
+                            Margin="6,0,6,6">
+                    <TabItem Header="{l10n:Loc DevTools.Tree.Merged}">
+                        <Grid>
+                            <TreeView x:Name="MergedTreeView"
+                                      Classes="devtool-tree"
+                                      ItemsSource="{Binding MergedTree}"
+                                      SelectedItem="{Binding SelectedMergedNode, Mode=TwoWay}"
+                                      ItemTemplate="{StaticResource DevToolsTreeNodeTemplate}" />
+                            <TextBlock Text="{l10n:Loc DevTools.State.NoTreeNodes}"
+                                       Foreground="{StaticResource DevToolsTextMutedBrush}"
+                                       FontSize="11"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       IsVisible="{Binding ShowMergedTreeEmpty}" />
+                        </Grid>
+                    </TabItem>
+                    <TabItem Header="{l10n:Loc DevTools.Tree.Visual}">
+                        <Grid>
+                            <TreeView x:Name="VisualTreeView"
+                                      Classes="devtool-tree"
+                                      ItemsSource="{Binding VisualTree}"
+                                      SelectedItem="{Binding SelectedVisualNode, Mode=TwoWay}"
+                                      ItemTemplate="{StaticResource DevToolsTreeNodeTemplate}" />
+                            <TextBlock Text="{l10n:Loc DevTools.State.NoTreeNodes}"
+                                       Foreground="{StaticResource DevToolsTextMutedBrush}"
+                                       FontSize="11"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       IsVisible="{Binding ShowVisualTreeEmpty}" />
+                        </Grid>
+                    </TabItem>
+                    <TabItem Header="{l10n:Loc DevTools.Tree.Logical}">
+                        <Grid>
+                            <TreeView x:Name="LogicalTreeView"
+                                      Classes="devtool-tree"
+                                      ItemsSource="{Binding LogicalTree}"
+                                      SelectedItem="{Binding SelectedLogicalNode, Mode=TwoWay}"
+                                      ItemTemplate="{StaticResource DevToolsTreeNodeTemplate}" />
+                            <TextBlock Text="{l10n:Loc DevTools.State.NoTreeNodes}"
+                                       Foreground="{StaticResource DevToolsTextMutedBrush}"
+                                       FontSize="11"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       IsVisible="{Binding ShowLogicalTreeEmpty}" />
+                        </Grid>
+                    </TabItem>
+                </TabControl>
+            </Grid>
+        </Border>
+
+        <GridSplitter Grid.Column="2"
+                      Width="4"
+                      Background="Transparent"
+                      Cursor="SizeWestEast"
+                      ResizeDirection="Columns" />
+
+        <Grid Grid.Column="3"
+              RowDefinitions="46,*"
+              IsVisible="{Binding IsElementsSection}">
+            <Border Grid.Row="0"
+                    Classes="panel"
+                    BorderThickness="0,0,0,1">
+                <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto"
+                      ColumnSpacing="8"
+                      Margin="10,0"
+                      VerticalAlignment="Center">
+                    <Border Width="24"
+                            Height="24"
+                            CornerRadius="4"
+                            Background="{StaticResource DevToolsSelectionBrush}">
+                        <Viewbox Width="15" Height="15">
+                            <Canvas Width="24" Height="24">
+                                <Path Fill="{StaticResource DevToolsTextMutedBrush}"
+                                      Data="M12,3 L20,7.5 L20,16.5 L12,21 L4,16.5 L4,7.5 Z M12,5.2 L6,8.6 L12,12 L18,8.6 Z M6,10.8 L6,15.3 L11,18.1 L11,13.7 Z M18,10.8 L13,13.7 L13,18.1 L18,15.3 Z" />
+                            </Canvas>
+                        </Viewbox>
+                    </Border>
+                    <ComboBox Grid.Column="1"
+                              Classes="devtool-toolbar-combo"
+                              ItemsSource="{Binding AvailableCategories}"
+                              SelectedItem="{Binding SelectedCategoryItem, Mode=TwoWay}"
+                              DisplayMemberBinding="{Binding Display}" />
+                    <Border Grid.Column="2"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Height="24"
+                            MinWidth="34"
+                            Padding="8,0"
+                            CornerRadius="12"
+                            Background="{StaticResource DevToolsSurfaceMutedBrush}"
+                            BorderBrush="{StaticResource DevToolsBorderBrush}"
+                            BorderThickness="1"
+                            ToolTip.Tip="{l10n:Loc DevTools.Property.VisibleCount}">
+                        <TextBlock Text="{Binding VisiblePropertiesCount}"
+                                   Foreground="{StaticResource DevToolsTextMutedBrush}"
+                                   FontSize="12"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Center" />
+                    </Border>
+                    <TextBox Grid.Column="3"
+                             Classes="devtool-search"
+                             Text="{Binding SearchText, Mode=TwoWay}"
+                             PlaceholderText="{l10n:Loc DevTools.Property.SearchPlaceholder}">
+                        <TextBox.InnerLeftContent>
+                            <Viewbox Width="15" Height="15" Margin="8,0,0,0">
+                                <Canvas Width="24" Height="24">
+                                    <Path Fill="Transparent"
+                                          Stroke="{StaticResource DevToolsTextMutedBrush}"
+                                          StrokeThickness="1.8"
+                                          StrokeLineCap="Round"
+                                          Data="M10.5,4 A6.5,6.5 0 1 0 10.5,17 A6.5,6.5 0 1 0 10.5,4 M15.5,15.5 L20,20" />
+                                </Canvas>
+                            </Viewbox>
+                        </TextBox.InnerLeftContent>
+                    </TextBox>
+                    <Button Grid.Column="4"
+                            Classes="ghost-icon-button"
+                            Command="{Binding ResetPropertyFiltersCommand}"
+                            ToolTip.Tip="{l10n:Loc DevTools.Property.ResetFilters}">
+                        <Viewbox Width="17" Height="17">
+                            <Canvas Width="24" Height="24">
+                                <Path Fill="Transparent"
+                                      Stroke="{Binding $parent[Button].Foreground}"
+                                      StrokeThickness="1.8"
+                                      StrokeLineCap="Round"
+                                      Data="M4,6 L20,6 M7,12 L17,12 M10,18 L14,18" />
+                            </Canvas>
+                        </Viewbox>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="1"
+                    Classes="panel"
+                    BorderThickness="0"
+                    Background="{StaticResource DevToolsWindowBackgroundBrush}">
+                <ScrollViewer Name="PropertiesScroll"
+                              HorizontalScrollBarVisibility="Disabled">
+                    <Grid Width="{Binding #PropertiesScroll.Bounds.Width}">
+                        <ItemsControl ItemsSource="{Binding GroupedProperties}"
+                                      HorizontalAlignment="Stretch"
+                                      ItemTemplate="{StaticResource PropertyGroupTemplate}"
+                                      Grid.IsSharedSizeScope="True" />
+                        <StackPanel HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Spacing="6"
+                                    IsVisible="{Binding ShowNoSelection}">
+                            <TextBlock Text="{l10n:Loc DevTools.State.NoSelection}"
+                                       Foreground="{StaticResource DevToolsTextBrush}"
+                                       FontSize="13"
+                                       FontWeight="SemiBold"
+                                       HorizontalAlignment="Center" />
+                            <TextBlock Text="{l10n:Loc DevTools.State.SelectElementHint}"
+                                       Foreground="{StaticResource DevToolsTextMutedBrush}"
+                                       FontSize="11"
+                                       HorizontalAlignment="Center" />
+                        </StackPanel>
+                        <StackPanel HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Spacing="6"
+                                    IsVisible="{Binding ShowNoProperties}">
+                            <TextBlock Text="{l10n:Loc DevTools.State.NoPropertyResults}"
+                                       Foreground="{StaticResource DevToolsTextBrush}"
+                                       FontSize="13"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Text="{l10n:Loc DevTools.State.ResetFiltersHint}"
+                                       Foreground="{StaticResource DevToolsTextMutedBrush}"
+                                       FontSize="11" />
+                        </StackPanel>
+                    </Grid>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+
+        <GridSplitter Grid.Column="4"
+                      Width="4"
+                      Background="Transparent"
+                      Cursor="SizeWestEast"
+                      IsVisible="{Binding IsElementsSection}"
+                      ResizeDirection="Columns" />
+
+        <Grid Grid.Column="5"
+              RowDefinitions="184,4,*"
+              Background="{StaticResource DevToolsSurfaceBrush}"
+              IsVisible="{Binding IsElementsSection}">
+            <Border Grid.Row="0"
+                    Classes="panel"
+                    BorderThickness="0,0,0,1"
+                    Padding="9">
+                <Grid RowDefinitions="Auto,*">
+                    <TextBlock Text="{l10n:Loc DevTools.BoxModel.Title}"
+                               Foreground="{StaticResource DevToolsTextMutedBrush}"
+                               FontSize="11"
+                               FontWeight="SemiBold"
+                               Margin="2,0,0,6" />
+
+                    <Border Grid.Row="1"
+                            BorderBrush="#D6A793"
+                            BorderThickness="1"
+                            Background="#E6C2B4"
+                            CornerRadius="6"
+                            Padding="20,16"
+                            HorizontalAlignment="Stretch">
+                        <Grid>
+                            <TextBlock Text="{l10n:Loc DevTools.BoxModel.Margin}"
+                                       FontSize="10"
+                                       Foreground="#9B6E61"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Top"
+                                       Margin="-18,-16,0,0" />
+                            <TextBlock Text="{Binding LayoutMarginDisplay}"
+                                       Foreground="#9B6E61"
+                                       FontSize="11"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Top"
+                                       Margin="0,-16,0,0" />
+
+                            <Border BorderBrush="#C7A46D"
+                                    BorderThickness="1"
+                                    Background="#E8D4AE"
+                                    CornerRadius="5"
+                                     Padding="18,14">
+                                    <Grid>
+                                        <TextBlock Text="{l10n:Loc DevTools.BoxModel.Border}"
+                                                   FontSize="10"
+                                                   Foreground="#92723F"
+                                                   HorizontalAlignment="Left"
+                                                   VerticalAlignment="Top"
+                                                   Margin="-16,-14,0,0" />
+                                    <TextBlock Text="{Binding LayoutBorderDisplay}"
+                                               Foreground="#92723F"
+                                               FontSize="11"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Top"
+                                               Margin="0,-14,0,0" />
+
+                                    <Border BorderBrush="#69BFA4"
+                                            BorderThickness="1"
+                                            Background="#A8DDCB"
+                                            CornerRadius="5"
+                                             Padding="18,14">
+                                            <Grid>
+                                                <TextBlock Text="{l10n:Loc DevTools.BoxModel.Padding}"
+                                                           FontSize="10"
+                                                           Foreground="#2D826D"
+                                                           HorizontalAlignment="Left"
+                                                           VerticalAlignment="Top"
+                                                           Margin="-16,-14,0,0" />
+                                            <TextBlock Text="{Binding LayoutPaddingDisplay}"
+                                                       Foreground="#2D826D"
+                                                       FontSize="11"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Top"
+                                                       Margin="0,-14,0,0" />
+
+                                            <Border BorderBrush="#5B9BD7"
+                                                    BorderThickness="1"
+                                                    Background="#9CCDF1"
+                                                    CornerRadius="6"
+                                                    MinHeight="44"
+                                                    MinWidth="96">
+                                                <TextBlock Text="{Binding LayoutBoundsDisplay}"
+                                                           Foreground="#244B70"
+                                                           FontSize="12"
+                                                           FontWeight="SemiBold"
+                                                           TextWrapping="Wrap"
+                                                           TextAlignment="Center"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"
+                                                           Margin="8,0" />
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <GridSplitter Grid.Row="1"
+                          Height="4"
+                          Background="Transparent"
+                          Cursor="SizeNorthSouth"
+                          ResizeDirection="Rows" />
+
+            <Border Grid.Row="2"
+                    Classes="panel"
+                    BorderThickness="0"
+                    Padding="8">
+                <Grid RowDefinitions="34,*">
+                    <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="6">
+                        <Button x:Name="StylesInspectorTab"
+                                Classes="inspector-tab"
+                                Classes.active="{Binding IsStylesInspector}"
+                                Command="{Binding SelectInspectorTabCommand}"
+                                CommandParameter="Styles"
+                                Content="{l10n:Loc DevTools.Inspector.Styles}" />
+                        <Button x:Name="BindingsInspectorTab"
+                                Grid.Column="1"
+                                Classes="inspector-tab"
+                                Classes.active="{Binding IsBindingsInspector}"
+                                Command="{Binding SelectInspectorTabCommand}"
+                                CommandParameter="Bindings"
+                                Content="{l10n:Loc DevTools.Inspector.Bindings}" />
+                    </Grid>
+
+                    <ScrollViewer Grid.Row="1"
+                                  HorizontalScrollBarVisibility="Disabled">
+                        <Grid>
+                            <StackPanel Spacing="6"
+                                        IsVisible="{Binding ShowStylesInspector}">
+                                <Border Classes="inspector-card">
+                                    <StackPanel Spacing="8">
+                                        <TextBlock Text="{Binding SelectedNodeStyles.Type}"
+                                                   Foreground="{StaticResource DevToolsTextBrush}"
+                                                   FontSize="13"
+                                                   FontWeight="SemiBold"
+                                                   TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding SelectedNodeStyles.DisplayName}"
+                                                   Foreground="{StaticResource DevToolsTextMutedBrush}"
+                                                   FontSize="12"
+                                                   TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding SelectedNodeStyles.DisplayClasses}"
+                                                   Foreground="{StaticResource DevToolsTextFaintBrush}"
+                                                   FontSize="12"
+                                                   TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </Border>
+
+                                <Grid ColumnDefinitions="*,*" ColumnSpacing="6">
+                                    <Border Classes="inspector-card">
+                                        <StackPanel Spacing="4">
+                                            <TextBlock Text="{Binding LocalStyleCount}"
+                                                       Foreground="{StaticResource DevToolsTextBrush}"
+                                                       FontSize="20"
+                                                       FontWeight="SemiBold" />
+                                            <TextBlock Text="{l10n:Loc DevTools.Inspector.StylesLabel}"
+                                                       Foreground="{StaticResource DevToolsTextMutedBrush}"
+                                                       FontSize="12" />
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Grid.Column="1"
+                                            Classes="inspector-card">
+                                        <StackPanel Spacing="4">
+                                            <TextBlock Text="{Binding PropertiesCount}"
+                                                       Foreground="{StaticResource DevToolsTextBrush}"
+                                                       FontSize="20"
+                                                       FontWeight="SemiBold" />
+                                            <TextBlock Text="{l10n:Loc DevTools.Inspector.PropertiesLabel}"
+                                                       Foreground="{StaticResource DevToolsTextMutedBrush}"
+                                                       FontSize="12" />
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+
+                                <Border Classes="inspector-card compact">
+                                    <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="6">
+                                        <TextBlock Text="{l10n:Loc DevTools.Inspector.StyleKey}"
+                                                   Foreground="{StaticResource DevToolsTextFaintBrush}"
+                                                   FontSize="11"
+                                                   FontWeight="SemiBold" />
+                                        <TextBlock Grid.Row="1"
+                                                   Text="{Binding SelectedNodeStyles.StyleKey}"
+                                                   Foreground="{StaticResource DevToolsTextBrush}"
+                                                   FontSize="12"
+                                                   TextWrapping="Wrap" />
+                                        <TextBlock Grid.Row="2"
+                                                   Text="{l10n:Loc DevTools.Inspector.TemplatedParent}"
+                                                   Foreground="{StaticResource DevToolsTextFaintBrush}"
+                                                   FontSize="11"
+                                                   FontWeight="SemiBold"
+                                                   Margin="0,6,0,0" />
+                                        <TextBlock Grid.Row="3"
+                                                   Text="{Binding SelectedNodeStyles.TemplatedParentType}"
+                                                   Foreground="{StaticResource DevToolsTextBrush}"
+                                                   FontSize="12"
+                                                   TextWrapping="Wrap" />
+                                    </Grid>
+                                </Border>
+
+                                <ItemsControl ItemsSource="{Binding SelectedNodeStyles.LocalStyles}"
+                                              ItemTemplate="{StaticResource StyleEntryTemplate}"
+                                              IsVisible="{Binding HasLocalStyles}" />
+
+                                <Border Classes="empty-state"
+                                         IsVisible="{Binding HasNoLocalStyles}">
+                                    <TextBlock Text="{l10n:Loc DevTools.Inspector.NoLocalStyles}"
+                                               Foreground="{StaticResource DevToolsTextMutedBrush}"
+                                               FontSize="12" />
+                                </Border>
+
+                                <Border Classes="inspector-section-title">
+                                    <TextBlock Text="{l10n:Loc DevTools.Inspector.HierarchyStyles}"
+                                               Foreground="{StaticResource DevToolsTextFaintBrush}"
+                                               FontSize="11"
+                                               FontWeight="SemiBold" />
+                                </Border>
+
+                                <ItemsControl ItemsSource="{Binding SelectedNodeStyles.HierarchyStyles}"
+                                              ItemTemplate="{StaticResource StyleEntryTemplate}"
+                                              IsVisible="{Binding HasHierarchyStyles}" />
+
+                                <Border Classes="empty-state"
+                                         IsVisible="{Binding HasNoHierarchyStyles}">
+                                    <TextBlock Text="{l10n:Loc DevTools.Inspector.NoHierarchyStyles}"
+                                               Foreground="{StaticResource DevToolsTextMutedBrush}"
+                                               FontSize="12" />
+                                </Border>
+
+                                <Border Classes="inspector-section-title">
+                                    <TextBlock Text="{l10n:Loc DevTools.Inspector.EffectiveSetters}"
+                                               Foreground="{StaticResource DevToolsTextFaintBrush}"
+                                               FontSize="11"
+                                               FontWeight="SemiBold" />
+                                </Border>
+
+                                <ItemsControl ItemsSource="{Binding SelectedNodeStyles.EffectiveSetters}"
+                                              IsVisible="{Binding HasEffectiveSetters}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="x:String">
+                                            <Border Classes="inspector-row">
+                                                <TextBlock Text="{Binding}"
+                                                           Foreground="{StaticResource DevToolsTextBrush}"
+                                                           FontSize="12"
+                                                           TextTrimming="CharacterEllipsis" />
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <Border Classes="empty-state"
+                                         IsVisible="{Binding HasNoEffectiveSetters}">
+                                    <TextBlock Text="{l10n:Loc DevTools.Inspector.NoEffectiveSetters}"
+                                               Foreground="{StaticResource DevToolsTextMutedBrush}"
+                                               FontSize="12" />
+                                </Border>
+                            </StackPanel>
+
+                            <Border Classes="empty-state"
+                                    IsVisible="{Binding ShowInspectorNoSelection}">
+                                <TextBlock Text="{l10n:Loc DevTools.State.NoSelection}"
+                                           Foreground="{StaticResource DevToolsTextMutedBrush}"
+                                           FontSize="11"
+                                           HorizontalAlignment="Center" />
+                            </Border>
+
+                            <StackPanel Spacing="6"
+                                        IsVisible="{Binding IsBindingsInspector}">
+                                <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="5">
+                                    <TextBlock Text="{Binding BindingExpressionCount}"
+                                               Foreground="{StaticResource DevToolsTextBrush}"
+                                               FontSize="13"
+                                               FontWeight="SemiBold"
+                                               VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1"
+                                               Text="{l10n:Loc DevTools.Binding.Expressions}"
+                                               Foreground="{StaticResource DevToolsTextBrush}"
+                                               FontSize="13"
+                                               FontWeight="SemiBold"
+                                               VerticalAlignment="Center" />
+                                </Grid>
+
+                                <ItemsControl ItemsSource="{Binding BindingExpressions}"
+                                              IsVisible="{Binding HasBindingExpressions}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:BindingExpressionEntryViewModel">
+                                            <Border Classes="inspector-row">
+                                                <StackPanel Spacing="6">
+                                                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="5">
+                                                         <TextBlock Text="{Binding Property}"
+                                                                   Foreground="{StaticResource DevToolsTextBrush}"
+                                                                   FontSize="12" FontWeight="SemiBold" />
+                                                         <TextBlock Grid.Column="1" Text="{Binding Priority}"
+                                                                   Foreground="{StaticResource DevToolsTextMutedBrush}" FontSize="10" />
+                                                    </Grid>
+                                                    <TextBlock Text="{Binding DisplayType}"
+                                                               Foreground="{StaticResource DevToolsTextFaintBrush}"
+                                                               FontSize="11"
+                                                               TextTrimming="CharacterEllipsis" />
+                                                     <TextBlock Text="{Binding Description}"
+                                                               Foreground="{StaticResource DevToolsTextBrush}"
+                                                               FontSize="12"
+                                                                TextWrapping="Wrap" />
+                                                     <TextBlock Text="{Binding Value}"
+                                                                Foreground="{StaticResource DevToolsAccentBrush}"
+                                                                FontSize="12" TextWrapping="Wrap" />
+                                                     <ItemsControl ItemsSource="{Binding Details}" IsVisible="{Binding HasDetails}">
+                                                         <ItemsControl.ItemTemplate>
+                                                             <DataTemplate x:DataType="x:String">
+                                                                 <TextBlock Text="{Binding}" Foreground="{StaticResource DevToolsTextMutedBrush}"
+                                                                            FontSize="10" TextWrapping="Wrap" />
+                                                             </DataTemplate>
+                                                         </ItemsControl.ItemTemplate>
+                                                     </ItemsControl>
+                                                     <TextBlock Text="{Binding Error}" IsVisible="{Binding HasError}"
+                                                                Foreground="{StaticResource DevToolsErrorBrush}"
+                                                                FontSize="11" TextWrapping="Wrap" />
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <Border Classes="empty-state"
+                                         IsVisible="{Binding HasNoBindingExpressions}">
+                                    <TextBlock Text="{l10n:Loc DevTools.Binding.NoExpressions}"
+                                               Foreground="{StaticResource DevToolsTextMutedBrush}"
+                                               FontSize="12" />
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Border Grid.Column="1"
+                Grid.ColumnSpan="5"
+                Classes="panel"
+                BorderThickness="0"
+                IsVisible="{Binding IsAssetsSection}">
+            <Grid RowDefinitions="46,34,*" Background="{StaticResource DevToolsWindowBackgroundBrush}">
+                <Border Classes="panel" BorderThickness="0,0,0,1">
+                    <Grid ColumnDefinitions="*,Auto,Auto" Margin="12,0" ColumnSpacing="8">
+                        <TextBlock Text="{l10n:Loc DevTools.Section.Assets}"
+                                   Foreground="{StaticResource DevToolsTextBrush}"
+                                   FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="1" Text="{Binding AssetCount}"
+                                   Foreground="{StaticResource DevToolsTextMutedBrush}" VerticalAlignment="Center" />
+                        <Button Grid.Column="2" Classes="ghost-icon-button"
+                                Command="{Binding RefreshAssetsCommand}" Content="↻"
+                                ToolTip.Tip="{l10n:Loc DevTools.Asset.Refresh}" />
+                    </Grid>
+                </Border>
+                <Border Grid.Row="1" Classes="table-header">
+                    <Grid ColumnDefinitions="1.2*,2.4*,1.2*,0.7*" ColumnSpacing="12">
+                        <TextBlock Text="{l10n:Loc DevTools.Asset.FileName}" />
+                        <TextBlock Grid.Column="1" Text="{l10n:Loc DevTools.Asset.RelativePath}" />
+                        <TextBlock Grid.Column="2" Text="{l10n:Loc DevTools.Asset.Assembly}" />
+                        <TextBlock Grid.Column="3" Text="{l10n:Loc DevTools.Asset.Size}" />
+                    </Grid>
+                </Border>
+                <Grid Grid.Row="2">
+                        <ListBox Classes="virtualized-data-list"
+                                 ItemsSource="{Binding Assets}"
+                                 IsVisible="{Binding HasAssets}"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel />
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate x:DataType="vm:AssetEntryViewModel">
+                                    <Border Classes="data-row" ToolTip.Tip="{Binding Uri}">
+                                        <Grid ColumnDefinitions="1.2*,2.4*,1.2*,0.7*" ColumnSpacing="12" MinHeight="36">
+                                            <TextBlock Text="{Binding FileName}" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Grid.Column="1" Text="{Binding RelativePath}" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Grid.Column="2" Text="{Binding Assembly}" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Grid.Column="3" Text="{Binding DisplaySize}" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <TextBlock Text="{l10n:Loc DevTools.Asset.NoAssets}"
+                                   IsVisible="{Binding HasNoAssets}"
+                                   Foreground="{StaticResource DevToolsTextMutedBrush}"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Grid>
+            </Grid>
+        </Border>
+
+        <Border Grid.Column="1"
+                Grid.ColumnSpan="5"
+                Classes="panel"
+                BorderThickness="0"
+                IsVisible="{Binding IsResourcesSection}">
+            <Grid RowDefinitions="46,*"
+                  Background="{StaticResource DevToolsWindowBackgroundBrush}">
+                <Border Classes="panel"
+                        BorderThickness="0,0,0,1">
+                    <Grid ColumnDefinitions="Auto,*,Auto,Auto"
+                          ColumnSpacing="8"
+                          Margin="12,0"
+                          VerticalAlignment="Center">
+                        <Border Width="24"
+                                Height="24"
+                                CornerRadius="4"
+                                Background="{StaticResource DevToolsSelectionBrush}">
+                            <Viewbox Width="15" Height="15">
+                                <Canvas Width="24" Height="24">
+                                    <Path Fill="Transparent"
+                                          Stroke="{StaticResource DevToolsTextMutedBrush}"
+                                          StrokeThickness="1.8"
+                                          StrokeLineCap="Round"
+                                          StrokeJoin="Round"
+                                          Data="{StaticResource DevToolsResourcesIcon}" />
+                                </Canvas>
+                            </Viewbox>
+                        </Border>
+                        <TextBlock Grid.Column="1"
+                                   Text="{l10n:Loc DevTools.Section.Resources}"
+                                   Foreground="{StaticResource DevToolsTextBrush}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center" />
+                        <Border Grid.Column="2"
+                                Height="24"
+                                MinWidth="34"
+                                Padding="8,0"
+                                CornerRadius="12"
+                                Background="{StaticResource DevToolsSurfaceMutedBrush}"
+                                BorderBrush="{StaticResource DevToolsBorderBrush}"
+                                BorderThickness="1">
+                            <TextBlock Text="{Binding ResourceCount}"
+                                       Foreground="{StaticResource DevToolsTextMutedBrush}"
+                                       FontSize="12"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                        </Border>
+                        <Button Grid.Column="3"
+                                Classes="ghost-icon-button"
+                                Command="{Binding RefreshResourcesCommand}"
+                                ToolTip.Tip="{l10n:Loc DevTools.Resource.Refresh}">
+                            <Viewbox Width="16" Height="16">
+                                <Canvas Width="24" Height="24">
+                                    <Path Fill="Transparent"
+                                          Stroke="{Binding $parent[Button].Foreground}"
+                                          StrokeThickness="1.8"
+                                          StrokeLineCap="Round"
+                                          StrokeJoin="Round"
+                                          Data="{StaticResource DevToolsRefreshIcon}" />
+                                </Canvas>
+                            </Viewbox>
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <Grid Grid.Row="1"
+                      ColumnDefinitions="280,1,*">
+                    <Grid RowDefinitions="34,*"
+                          Background="{StaticResource DevToolsSurfaceMutedBrush}">
+                        <Border Classes="table-header">
+                            <TextBlock Text="{l10n:Loc DevTools.Resource.Providers}"
+                                       Foreground="{StaticResource DevToolsTextMutedBrush}"
+                                       FontSize="11"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center" />
+                        </Border>
+                        <TreeView Grid.Row="1"
+                                  Classes="devtool-tree resource-tree"
+                                  Margin="6,4"
+                                  ItemsSource="{Binding ResourceTreeRoots}"
+                                  SelectedItem="{Binding SelectedResourceNode, Mode=TwoWay}"
+                                  ItemTemplate="{StaticResource ResourceTreeNodeTemplate}"
+                                  IsVisible="{Binding HasResources}" />
+                    </Grid>
+
+                    <Border Grid.Column="1"
+                            Background="{StaticResource DevToolsBorderBrush}" />
+
+                    <Grid Grid.Column="2"
+                          RowDefinitions="36,34,*">
+                        <Border Padding="12,0"
+                                Background="{StaticResource DevToolsSurfaceBrush}"
+                                BorderBrush="{StaticResource DevToolsBorderBrush}"
+                                BorderThickness="0,0,0,1">
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                <TextBlock Text="{Binding SelectedResourcePath}"
+                                           Foreground="{StaticResource DevToolsTextBrush}"
+                                           FontWeight="SemiBold"
+                                           TextTrimming="CharacterEllipsis"
+                                           VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding SelectedResourceCount}"
+                                           Foreground="{StaticResource DevToolsTextMutedBrush}"
+                                           VerticalAlignment="Center" />
+                            </Grid>
+                        </Border>
+                        <Border Grid.Row="1" Classes="table-header">
+                            <Grid ColumnDefinitions="1.45*,0.7*,1.25*,2.1*" ColumnSpacing="16">
+                                <TextBlock Text="{l10n:Loc DevTools.Resource.Key}"
+                                           Foreground="{StaticResource DevToolsTextMutedBrush}"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"
+                                           VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1"
+                                           Text="{l10n:Loc DevTools.Resource.Kind}"
+                                           Foreground="{StaticResource DevToolsTextMutedBrush}"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"
+                                           VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="2"
+                                           Text="{l10n:Loc DevTools.Resource.ValueType}"
+                                           Foreground="{StaticResource DevToolsTextMutedBrush}"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"
+                                           VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="3"
+                                           Text="{l10n:Loc DevTools.Resource.Value}"
+                                           Foreground="{StaticResource DevToolsTextMutedBrush}"
+                                           FontSize="11"
+                                           FontWeight="SemiBold"
+                                           VerticalAlignment="Center" />
+                            </Grid>
+                        </Border>
+                        <Grid Grid.Row="2">
+                            <ListBox Classes="virtualized-data-list"
+                                     ItemsSource="{Binding SelectedResourceEntries}"
+                                     ItemTemplate="{StaticResource ResourceEntryTemplate}"
+                                     IsVisible="{Binding HasSelectedResources}"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                <ListBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <VirtualizingStackPanel />
+                                    </ItemsPanelTemplate>
+                                </ListBox.ItemsPanel>
+                            </ListBox>
+                            <Border Classes="empty-state"
+                                    Width="280"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    IsVisible="{Binding ShowSelectedResourceEmpty}">
+                                <TextBlock Text="{l10n:Loc DevTools.Resource.NoNodeResources}"
+                                           Foreground="{StaticResource DevToolsTextMutedBrush}"
+                                           FontSize="13"
+                                           TextAlignment="Center"
+                                           TextWrapping="Wrap" />
+                            </Border>
+                            <Border Classes="empty-state"
+                                    Width="260"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    IsVisible="{Binding ShowResourcesEmpty}">
+                                <TextBlock Text="{l10n:Loc DevTools.Resource.NoResources}"
+                                           Foreground="{StaticResource DevToolsTextMutedBrush}"
+                                           FontSize="13"
+                                           HorizontalAlignment="Center" />
+                            </Border>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <Border Grid.Column="1"
+                Grid.ColumnSpan="5"
+                Classes="panel"
+                BorderThickness="0"
+                IsVisible="{Binding IsBindingsSection}">
+            <Grid RowDefinitions="46,*"
+                  Background="{StaticResource DevToolsWindowBackgroundBrush}">
+                <Border Classes="panel"
+                        BorderThickness="0,0,0,1">
+                    <Grid ColumnDefinitions="Auto,*,Auto,Auto"
+                          ColumnSpacing="8"
+                          Margin="12,0"
+                          VerticalAlignment="Center">
+                        <Border Width="24"
+                                Height="24"
+                                CornerRadius="4"
+                                Background="{StaticResource DevToolsSelectionBrush}">
+                            <Viewbox Width="15" Height="15">
+                                <Canvas Width="24" Height="24">
+                                    <Path Fill="Transparent"
+                                          Stroke="{StaticResource DevToolsTextMutedBrush}"
+                                          StrokeThickness="1.8"
+                                          StrokeLineCap="Round"
+                                          StrokeJoin="Round"
+                                          Data="{StaticResource DevToolsBindingsIcon}" />
+                                </Canvas>
+                            </Viewbox>
+                        </Border>
+                        <TextBlock Grid.Column="1"
+                                   Text="{l10n:Loc DevTools.Section.Bindings}"
+                                   Foreground="{StaticResource DevToolsTextBrush}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center" />
+                        <Border Grid.Column="2"
+                                Height="24"
+                                MinWidth="34"
+                                Padding="8,0"
+                                CornerRadius="12"
+                                Background="{StaticResource DevToolsSurfaceMutedBrush}"
+                                BorderBrush="{StaticResource DevToolsBorderBrush}"
+                                BorderThickness="1">
+                            <TextBlock Text="{Binding BindingErrorCount}"
+                                       Foreground="{StaticResource DevToolsTextMutedBrush}"
+                                       FontSize="12"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                        </Border>
+                        <Button Grid.Column="3"
+                                Classes="ghost-icon-button"
+                                Command="{Binding RefreshBindingsCommand}"
+                                ToolTip.Tip="{l10n:Loc DevTools.Binding.Refresh}">
+                            <Viewbox Width="16" Height="16">
+                                <Canvas Width="24" Height="24">
+                                    <Path Fill="Transparent"
+                                          Stroke="{Binding $parent[Button].Foreground}"
+                                          StrokeThickness="1.8"
+                                          StrokeLineCap="Round"
+                                          StrokeJoin="Round"
+                                          Data="{StaticResource DevToolsRefreshIcon}" />
+                                </Canvas>
+                            </Viewbox>
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <Grid Grid.Row="1"
+                       RowDefinitions="34,*">
+                    <Border Classes="table-header">
+                        <Grid ColumnDefinitions="76,68,132,*" ColumnSpacing="10">
+                            <TextBlock Text="{l10n:Loc DevTools.Binding.Time}"
+                                       Foreground="{StaticResource DevToolsTextMutedBrush}"
+                                       FontSize="11"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="1"
+                                       Text="{l10n:Loc DevTools.Binding.Level}"
+                                       Foreground="{StaticResource DevToolsTextMutedBrush}"
+                                       FontSize="11"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="2"
+                                       Text="{l10n:Loc DevTools.Binding.Source}"
+                                       Foreground="{StaticResource DevToolsTextMutedBrush}"
+                                       FontSize="11"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="3"
+                                       Text="{l10n:Loc DevTools.Binding.Message}"
+                                       Foreground="{StaticResource DevToolsTextMutedBrush}"
+                                       FontSize="11"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center" />
+                        </Grid>
+                    </Border>
+                    <Grid Grid.Row="1">
+                            <ListBox Classes="virtualized-data-list"
+                                     ItemsSource="{Binding BindingErrors}"
+                                     ItemTemplate="{StaticResource BindingErrorTemplate}"
+                                     IsVisible="{Binding HasBindingErrors}"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                <ListBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <VirtualizingStackPanel />
+                                    </ItemsPanelTemplate>
+                                </ListBox.ItemsPanel>
+                            </ListBox>
+                            <Border Classes="empty-state"
+                                    Width="280"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    IsVisible="{Binding ShowBindingsEmpty}">
+                                <TextBlock Text="{l10n:Loc DevTools.Binding.NoWarnings}"
+                                           Foreground="{StaticResource DevToolsTextMutedBrush}"
+                                           FontSize="13"
+                                           HorizontalAlignment="Center" />
+                            </Border>
+                    </Grid>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <Border Grid.Column="1"
+                Grid.ColumnSpan="5"
+                Classes="panel"
+                BorderThickness="0"
+                IsVisible="{Binding IsMetricsSection}">
+            <Grid RowDefinitions="46,*"
+                  Background="{StaticResource DevToolsWindowBackgroundBrush}">
+                <Border Classes="panel"
+                        BorderThickness="0,0,0,1">
+                    <Grid ColumnDefinitions="Auto,*"
+                          ColumnSpacing="8"
+                          Margin="12,0"
+                          VerticalAlignment="Center">
+                        <Border Width="24"
+                                Height="24"
+                                CornerRadius="4"
+                                Background="{StaticResource DevToolsSelectionBrush}">
+                            <Viewbox Width="15" Height="15">
+                                <Canvas Width="24" Height="24">
+                                    <Path Fill="Transparent"
+                                          Stroke="{StaticResource DevToolsTextMutedBrush}"
+                                          StrokeThickness="1.8"
+                                          StrokeLineCap="Round"
+                                          StrokeJoin="Round"
+                                          Data="{StaticResource DevToolsMetricsIcon}" />
+                                </Canvas>
+                            </Viewbox>
+                        </Border>
+                        <TextBlock Grid.Column="1"
+                                   Text="{l10n:Loc DevTools.Section.Metrics}"
+                                   Foreground="{StaticResource DevToolsTextBrush}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center" />
+                    </Grid>
+                </Border>
+
+                <ScrollViewer Grid.Row="1"
+                              HorizontalScrollBarVisibility="Disabled">
+                    <Border Margin="12"
+                            MaxWidth="760"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Top"
+                            Background="{StaticResource DevToolsSurfaceBrush}"
+                            BorderBrush="{StaticResource DevToolsBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="5">
+                        <ItemsControl ItemsSource="{Binding Metrics}"
+                                      ItemTemplate="{StaticResource MetricItemTemplate}" />
+                    </Border>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+
+        <Border Grid.Column="1"
+                Grid.ColumnSpan="5"
+                Classes="panel"
+                BorderThickness="0"
+                IsVisible="{Binding IsSettingsSection}">
+            <Grid RowDefinitions="46,*"
+                  Background="{StaticResource DevToolsWindowBackgroundBrush}">
+                <Border Classes="panel" BorderThickness="0,0,0,1">
+                    <TextBlock Text="{l10n:Loc DevTools.Section.Settings}"
+                               Margin="14,0"
+                               Foreground="{StaticResource DevToolsTextBrush}"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center" />
+                </Border>
+                <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Margin="24,18,24,28"
+                                Spacing="14"
+                                MaxWidth="780"
+                                HorizontalAlignment="Stretch">
+                        <TextBlock Text="{l10n:Loc DevTools.Settings.Appearance}"
+                                   Classes="settings-section-title"
+                                   Margin="2,0,0,-4" />
+                        <Border Classes="inspector-card settings-card">
+                            <Grid Classes="settings-form" ColumnDefinitions="3*,2*" RowDefinitions="Auto,Auto,Auto">
+                                <TextBlock Text="{l10n:Loc DevTools.Settings.Theme}" VerticalAlignment="Center" />
+                                <ComboBox Grid.Column="1" ItemsSource="{Binding ThemeOptions}"
+                                          SelectedItem="{Binding Settings.Theme, Mode=TwoWay}" />
+                                <TextBlock Grid.Row="1" Text="{l10n:Loc DevTools.Settings.CompactMode}" VerticalAlignment="Center" />
+                                <CheckBox Grid.Row="1" Grid.Column="1" IsChecked="{Binding Settings.CompactMode, Mode=TwoWay}" />
+                                <TextBlock Grid.Row="2" Text="{l10n:Loc DevTools.Settings.TopMost}" VerticalAlignment="Center" />
+                                <CheckBox Grid.Row="2" Grid.Column="1" IsChecked="{Binding Settings.TopMost, Mode=TwoWay}" />
+                            </Grid>
+                        </Border>
+
+                        <TextBlock Text="{l10n:Loc DevTools.Settings.ElementsTree}"
+                                   Classes="settings-section-title" />
+                        <Border Classes="inspector-card settings-card">
+                            <Grid Classes="settings-form" ColumnDefinitions="3*,2*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+                                <TextBlock Text="{l10n:Loc DevTools.Settings.DefaultTree}" VerticalAlignment="Center" />
+                                <ComboBox Grid.Column="1" ItemsSource="{Binding TreeKindOptions}"
+                                          SelectedItem="{Binding Settings.DefaultTreeKind, Mode=TwoWay}" />
+                                <TextBlock Grid.Row="1" Text="{l10n:Loc DevTools.Settings.DefaultExpandDepth}" VerticalAlignment="Center" />
+                                <NumericUpDown Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="20"
+                                               Value="{Binding Settings.DefaultExpandDepth, Mode=TwoWay}" />
+                                <TextBlock Grid.Row="2" Text="{l10n:Loc DevTools.Settings.MaxTreeDepth}" VerticalAlignment="Center" />
+                                <NumericUpDown Grid.Row="2" Grid.Column="1" Minimum="1" Maximum="50"
+                                               Value="{Binding Settings.MaxTreeDepth, Mode=TwoWay}" />
+                                <TextBlock Grid.Row="3" Text="{l10n:Loc DevTools.Settings.AggregateTemplates}" VerticalAlignment="Center" />
+                                <CheckBox Grid.Row="3" Grid.Column="1" IsChecked="{Binding Settings.AggregateTemplateSubtrees, Mode=TwoWay}" />
+                                <TextBlock Grid.Row="4" Text="{l10n:Loc DevTools.Settings.InlinePseudoclasses}" VerticalAlignment="Center" />
+                                <CheckBox Grid.Row="4" Grid.Column="1" IsChecked="{Binding Settings.InlinePseudoclasses, Mode=TwoWay}" />
+                                <TextBlock Grid.Row="5" Text="{l10n:Loc DevTools.Settings.ContextualProperties}" VerticalAlignment="Center" />
+                                <CheckBox Grid.Row="5" Grid.Column="1" IsChecked="{Binding Settings.ContextualProperties, Mode=TwoWay}" />
+                                <TextBlock Grid.Row="6" Text="{l10n:Loc DevTools.Settings.IncludeClrProperties}" VerticalAlignment="Center" />
+                                <CheckBox Grid.Row="6" Grid.Column="1" IsChecked="{Binding Settings.IncludeClrProperties, Mode=TwoWay}" />
+                            </Grid>
+                        </Border>
+
+                        <TextBlock Text="{l10n:Loc DevTools.Settings.Overlay}"
+                                   Classes="settings-section-title" />
+                        <Border Classes="inspector-card settings-card">
+                            <Grid Classes="settings-form" ColumnDefinitions="3*,2*" RowDefinitions="Auto,Auto,Auto,Auto">
+                                <TextBlock Text="{l10n:Loc DevTools.Settings.ShowInfo}" VerticalAlignment="Center" />
+                                <CheckBox Grid.Column="1" IsChecked="{Binding Settings.OverlayShowInfo, Mode=TwoWay}" />
+                                <TextBlock Grid.Row="1" Text="{l10n:Loc DevTools.Settings.VisualizeBoxModel}" VerticalAlignment="Center" />
+                                <CheckBox Grid.Row="1" Grid.Column="1" IsChecked="{Binding Settings.OverlayVisualizeMarginPadding, Mode=TwoWay}" />
+                                <TextBlock Grid.Row="2" Text="{l10n:Loc DevTools.Settings.ShowRulers}" VerticalAlignment="Center" />
+                                <CheckBox Grid.Row="2" Grid.Column="1" IsChecked="{Binding Settings.OverlayShowRulers, Mode=TwoWay}" />
+                                <TextBlock Grid.Row="3" Text="{l10n:Loc DevTools.Settings.ShowExtensionLines}" VerticalAlignment="Center" />
+                                <CheckBox Grid.Row="3" Grid.Column="1" IsChecked="{Binding Settings.OverlayShowExtensionLines, Mode=TwoWay}" />
+                            </Grid>
+                        </Border>
+
+                        <TextBlock Text="{l10n:Loc DevTools.Settings.Shortcuts}"
+                                   Classes="settings-section-title" />
+                        <Border Classes="inspector-card settings-card">
+                            <Grid Classes="settings-form" ColumnDefinitions="3*,2*" RowDefinitions="Auto,Auto,Auto">
+                                <TextBlock Text="{l10n:Loc DevTools.Settings.PickShortcut}" VerticalAlignment="Center" />
+                                <TextBox Grid.Column="1" Text="{Binding Settings.PickElementShortcut, Mode=TwoWay}" />
+                                <TextBlock Grid.Row="1" Text="{l10n:Loc DevTools.Settings.RefreshShortcut}" VerticalAlignment="Center" />
+                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Settings.RefreshShortcut, Mode=TwoWay}" />
+                                <TextBlock Grid.Row="2" Text="{l10n:Loc DevTools.Settings.TopMostShortcut}" VerticalAlignment="Center" />
+                                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Settings.ToggleTopMostShortcut, Mode=TwoWay}" />
+                            </Grid>
+                        </Border>
+
+                        <TextBlock Text="{l10n:Loc DevTools.Settings.Metrics}"
+                                   Classes="settings-section-title" />
+                        <Border Classes="inspector-card settings-card">
+                            <Grid Classes="settings-form" ColumnDefinitions="3*,2*">
+                                <TextBlock Text="{l10n:Loc DevTools.Settings.MetricsInterval}" VerticalAlignment="Center" />
+                                <NumericUpDown Grid.Column="1" Minimum="250" Maximum="10000" Increment="250"
+                                               Value="{Binding Settings.MetricsRefreshIntervalMs, Mode=TwoWay}" />
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+
+        <ProgressBar Grid.ColumnSpan="6"
+                     Height="2"
+                     VerticalAlignment="Top"
+                     IsIndeterminate="True"
+                     IsVisible="{Binding IsBusy}"
+                     ZIndex="20" />
+
+        <Border Grid.Row="1"
+                 Grid.ColumnSpan="6"
+                 Classes="status-bar"
+                 Classes.error="{Binding IsStatusError}"
+                 Padding="10,0"
+                Background="{StaticResource DevToolsSurfaceMutedBrush}"
+                BorderBrush="{StaticResource DevToolsBorderBrush}"
+                 BorderThickness="0,1,0,0">
+            <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="6">
+                <Ellipse Width="6"
+                         Height="6"
+                         Classes="connection-state"
+                         Classes.error="{Binding IsStatusError}"
+                         VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1"
+                           Text="{Binding ConnectionStatusText}"
+                           Foreground="{StaticResource DevToolsTextMutedBrush}"
+                           FontSize="10"
+                           VerticalAlignment="Center" />
+                <TextBlock Grid.Column="2"
+                           Text="{Binding StatusMessage}"
+                           Classes="devtool-status"
+                           Foreground="{StaticResource DevToolsTextMutedBrush}"
+                           FontSize="10"
+                           TextTrimming="CharacterEllipsis"
+                           VerticalAlignment="Center"
+                           Classes.error="{Binding IsStatusError}" />
+                <TextBlock Grid.Column="3"
+                           Text="{l10n:Loc DevTools.Status.HotReload}"
+                           Foreground="{StaticResource DevToolsTextFaintBrush}"
+                           FontSize="10"
+                           VerticalAlignment="Center" />
+            </Grid>
+        </Border>
+    </Grid>
+</ui:LuminaWindow>

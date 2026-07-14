@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+<resheader name="resmimetype"><value>text/microsoft-resx</value></resheader><resheader name="version"><value>1.3</value></resheader><resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader><resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="DevTools.Title" xml:space="preserve"><value>Lumina 开发工具</value></data>
+  <data name="DevTools.Section.Elements" xml:space="preserve"><value>元素</value></data>
+  <data name="DevTools.Section.Resources" xml:space="preserve"><value>资源</value></data>
+  <data name="DevTools.Section.Assets" xml:space="preserve"><value>资产</value></data>
+  <data name="DevTools.Section.Bindings" xml:space="preserve"><value>绑定问题</value></data>
+  <data name="DevTools.Section.Metrics" xml:space="preserve"><value>指标</value></data>
+  <data name="DevTools.Section.Settings" xml:space="preserve"><value>设置</value></data>
+  <data name="DevTools.Tree.Merged" xml:space="preserve"><value>融合树</value></data>
+  <data name="DevTools.Tree.Visual" xml:space="preserve"><value>可视化树</value></data>
+  <data name="DevTools.Tree.Logical" xml:space="preserve"><value>逻辑树</value></data>
+  <data name="DevTools.Property.AllProperties" xml:space="preserve"><value>所有属性</value></data>
+  <data name="DevTools.Property.SearchPlaceholder" xml:space="preserve"><value>搜索属性</value></data>
+  <data name="DevTools.Property.ResetFilters" xml:space="preserve"><value>重置筛选</value></data>
+  <data name="DevTools.Property.VisibleCount" xml:space="preserve"><value>可见属性</value></data>
+  <data name="DevTools.Property.Auto" xml:space="preserve"><value>自动</value></data>
+  <data name="DevTools.Category.Common" xml:space="preserve"><value>通用</value></data>
+  <data name="DevTools.Category.Layout" xml:space="preserve"><value>布局</value></data>
+  <data name="DevTools.Category.Appearance" xml:space="preserve"><value>外观</value></data>
+  <data name="DevTools.Category.Behavior" xml:space="preserve"><value>行为</value></data>
+  <data name="DevTools.Category.Automation" xml:space="preserve"><value>自动化</value></data>
+  <data name="DevTools.Category.Misc" xml:space="preserve"><value>其他</value></data>
+  <data name="DevTools.Inspector.Styles" xml:space="preserve"><value>样式</value></data>
+  <data name="DevTools.Inspector.Bindings" xml:space="preserve"><value>绑定表达式</value></data>
+  <data name="DevTools.Inspector.StyleKey" xml:space="preserve"><value>样式键</value></data>
+  <data name="DevTools.Inspector.TemplatedParent" xml:space="preserve"><value>模板父级</value></data>
+  <data name="DevTools.Inspector.StylesLabel" xml:space="preserve"><value>样式</value></data>
+  <data name="DevTools.Inspector.PropertiesLabel" xml:space="preserve"><value>属性</value></data>
+  <data name="DevTools.Inspector.NoLocalStyles" xml:space="preserve"><value>没有本地样式</value></data>
+  <data name="DevTools.Inspector.HierarchyStyles" xml:space="preserve"><value>层级样式</value></data>
+  <data name="DevTools.Inspector.NoHierarchyStyles" xml:space="preserve"><value>层级中没有其他样式</value></data>
+  <data name="DevTools.Inspector.EffectiveSetters" xml:space="preserve"><value>生效的 Setter（本地设置）</value></data>
+  <data name="DevTools.Inspector.NoEffectiveSetters" xml:space="preserve"><value>没有本地设置的值</value></data>
+  <data name="DevTools.BoxModel.Title" xml:space="preserve"><value>盒模型</value></data>
+  <data name="DevTools.BoxModel.Margin" xml:space="preserve"><value>外边距</value></data>
+  <data name="DevTools.BoxModel.Border" xml:space="preserve"><value>边框</value></data>
+  <data name="DevTools.BoxModel.Padding" xml:space="preserve"><value>内边距</value></data>
+  <data name="DevTools.Thickness.Left" xml:space="preserve"><value>左</value></data>
+  <data name="DevTools.Thickness.Top" xml:space="preserve"><value>上</value></data>
+  <data name="DevTools.Thickness.Right" xml:space="preserve"><value>右</value></data>
+  <data name="DevTools.Thickness.Bottom" xml:space="preserve"><value>下</value></data>
+  <data name="DevTools.Toolbar.PickElement" xml:space="preserve"><value>拾取元素</value></data>
+  <data name="DevTools.Toolbar.Refresh" xml:space="preserve"><value>刷新</value></data>
+  <data name="DevTools.Resource.Key" xml:space="preserve"><value>键</value></data>
+  <data name="DevTools.Resource.Kind" xml:space="preserve"><value>种类</value></data>
+  <data name="DevTools.Resource.ValueType" xml:space="preserve"><value>类型</value></data>
+  <data name="DevTools.Resource.Value" xml:space="preserve"><value>值</value></data>
+  <data name="DevTools.Resource.Refresh" xml:space="preserve"><value>刷新资源</value></data>
+  <data name="DevTools.Resource.Apply" xml:space="preserve"><value>应用资源值</value></data>
+  <data name="DevTools.Resource.NoResources" xml:space="preserve"><value>没有资源</value></data>
+  <data name="DevTools.Resource.Providers" xml:space="preserve"><value>资源提供者</value></data>
+  <data name="DevTools.Resource.NoNodeResources" xml:space="preserve"><value>当前提供者没有直接定义资源。</value></data>
+  <data name="DevTools.Resource.DeferredValue" xml:space="preserve"><value>延迟加载的 AXAML 资源</value></data>
+  <data name="DevTools.Resource.ApplicationNode" xml:space="preserve"><value>应用</value></data>
+  <data name="DevTools.Resource.ResourcesNode" xml:space="preserve"><value>资源</value></data>
+  <data name="DevTools.Resource.StylesNode" xml:space="preserve"><value>样式</value></data>
+  <data name="DevTools.Resource.MergedNode" xml:space="preserve"><value>合并字典</value></data>
+  <data name="DevTools.Resource.ThemeNode" xml:space="preserve"><value>主题</value></data>
+  <data name="DevTools.Resource.StyleNode" xml:space="preserve"><value>样式</value></data>
+  <data name="DevTools.Binding.Issues" xml:space="preserve"><value>个问题</value></data>
+  <data name="DevTools.Binding.Refresh" xml:space="preserve"><value>刷新绑定</value></data>
+  <data name="DevTools.Binding.NoWarnings" xml:space="preserve"><value>没有绑定警告</value></data>
+  <data name="DevTools.Binding.Expressions" xml:space="preserve"><value>个绑定表达式</value></data>
+  <data name="DevTools.Binding.NoExpressions" xml:space="preserve"><value>没有活动的绑定表达式</value></data>
+  <data name="DevTools.Binding.Time" xml:space="preserve"><value>时间</value></data>
+  <data name="DevTools.Binding.Level" xml:space="preserve"><value>级别</value></data>
+  <data name="DevTools.Binding.Source" xml:space="preserve"><value>来源</value></data>
+  <data name="DevTools.Binding.Message" xml:space="preserve"><value>消息</value></data>
+  <data name="DevTools.Fallback.NoSelection" xml:space="preserve"><value>未选择</value></data>
+  <data name="DevTools.Fallback.Unnamed" xml:space="preserve"><value>(未命名)</value></data>
+  <data name="DevTools.Fallback.NoClasses" xml:space="preserve"><value>(无样式类)</value></data>
+  <data name="DevTools.Fallback.DefaultStyleKey" xml:space="preserve"><value>(默认)</value></data>
+  <data name="DevTools.Fallback.None" xml:space="preserve"><value>(无)</value></data>
+  <data name="DevTools.Fallback.NoStyleKey" xml:space="preserve"><value>(无样式键)</value></data>
+  <data name="DevTools.Property.ClearLocalValue" xml:space="preserve"><value>清除本地值</value></data>
+  <data name="DevTools.Property.InvalidNumber" xml:space="preserve"><value>请输入有效数字。</value></data>
+  <data name="DevTools.Property.Source.Local" xml:space="preserve"><value>本地</value></data>
+  <data name="DevTools.Property.Source.Effective" xml:space="preserve"><value>有效值</value></data>
+  <data name="DevTools.Property.Source.ReadOnly" xml:space="preserve"><value>只读</value></data>
+  <data name="DevTools.Property.Source.InspectOnly" xml:space="preserve"><value>仅查看</value></data>
+  <data name="DevTools.Resource.Source" xml:space="preserve"><value>来源</value></data>
+  <data name="DevTools.State.NoSelection" xml:space="preserve"><value>未选择元素</value></data>
+  <data name="DevTools.State.SelectElementHint" xml:space="preserve"><value>请选择树节点或使用元素拾取器。</value></data>
+  <data name="DevTools.State.NoPropertyResults" xml:space="preserve"><value>没有匹配的属性</value></data>
+  <data name="DevTools.State.ResetFiltersHint" xml:space="preserve"><value>请调整搜索条件或重置筛选。</value></data>
+  <data name="DevTools.State.NoTreeNodes" xml:space="preserve"><value>没有树节点</value></data>
+  <data name="DevTools.Status.Connected" xml:space="preserve"><value>已连接</value></data>
+  <data name="DevTools.Status.HotReload" xml:space="preserve"><value>热重载</value></data>
+  <data name="DevTools.Metrics.VisualNodes" xml:space="preserve"><value>可视节点</value></data>
+  <data name="DevTools.Metrics.LogicalNodes" xml:space="preserve"><value>逻辑节点</value></data>
+  <data name="DevTools.Metrics.Properties" xml:space="preserve"><value>属性</value></data>
+  <data name="DevTools.Metrics.VisibleProperties" xml:space="preserve"><value>可见属性</value></data>
+  <data name="DevTools.Metrics.Resources" xml:space="preserve"><value>资源</value></data>
+  <data name="DevTools.Metrics.Assets" xml:space="preserve"><value>资产</value></data>
+  <data name="DevTools.Asset.Refresh" xml:space="preserve"><value>刷新资产</value></data>
+  <data name="DevTools.Asset.FileName" xml:space="preserve"><value>文件名</value></data>
+  <data name="DevTools.Asset.RelativePath" xml:space="preserve"><value>相对路径</value></data>
+  <data name="DevTools.Asset.Assembly" xml:space="preserve"><value>程序集</value></data>
+  <data name="DevTools.Asset.Size" xml:space="preserve"><value>文件大小</value></data>
+  <data name="DevTools.Asset.NoAssets" xml:space="preserve"><value>没有嵌入资产</value></data>
+  <data name="DevTools.Metrics.BindingIssues" xml:space="preserve"><value>绑定问题</value></data>
+  <data name="DevTools.Metrics.Tree" xml:space="preserve"><value>树</value></data>
+  <data name="DevTools.Metrics.Selection" xml:space="preserve"><value>当前选择</value></data>
+  <data name="DevTools.Metrics.Application" xml:space="preserve"><value>应用</value></data>
+  <data name="DevTools.Metrics.Runtime" xml:space="preserve"><value>运行时</value></data>
+  <data name="DevTools.Metrics.ManagedHeap" xml:space="preserve"><value>托管堆</value></data>
+  <data name="DevTools.Metrics.WorkingSet" xml:space="preserve"><value>工作集</value></data>
+  <data name="DevTools.Metrics.Threads" xml:space="preserve"><value>线程数</value></data>
+  <data name="DevTools.Metrics.CpuTime" xml:space="preserve"><value>CPU 时间</value></data>
+  <data name="DevTools.Metrics.GcCollections" xml:space="preserve"><value>GC 次数（0 / 1 / 2）</value></data>
+  <data name="DevTools.Settings.Appearance" xml:space="preserve"><value>外观</value></data>
+  <data name="DevTools.Settings.Theme" xml:space="preserve"><value>主题</value></data>
+  <data name="DevTools.Settings.CompactMode" xml:space="preserve"><value>紧凑模式</value></data>
+  <data name="DevTools.Settings.TopMost" xml:space="preserve"><value>窗口置顶</value></data>
+  <data name="DevTools.Settings.ElementsTree" xml:space="preserve"><value>元素树</value></data>
+  <data name="DevTools.Settings.DefaultTree" xml:space="preserve"><value>默认树</value></data>
+  <data name="DevTools.Settings.DefaultExpandDepth" xml:space="preserve"><value>默认展开深度</value></data>
+  <data name="DevTools.Settings.MaxTreeDepth" xml:space="preserve"><value>最大树深度</value></data>
+  <data name="DevTools.Settings.AggregateTemplates" xml:space="preserve"><value>聚合模板子树</value></data>
+  <data name="DevTools.Settings.InlinePseudoclasses" xml:space="preserve"><value>内联显示伪类</value></data>
+  <data name="DevTools.Settings.ContextualProperties" xml:space="preserve"><value>仅显示上下文属性</value></data>
+  <data name="DevTools.Settings.IncludeClrProperties" xml:space="preserve"><value>包含 CLR 属性</value></data>
+  <data name="DevTools.Settings.Overlay" xml:space="preserve"><value>元素覆盖层</value></data>
+  <data name="DevTools.Settings.ShowInfo" xml:space="preserve"><value>显示元素信息</value></data>
+  <data name="DevTools.Settings.VisualizeBoxModel" xml:space="preserve"><value>显示外边距和内边距</value></data>
+  <data name="DevTools.Settings.ShowRulers" xml:space="preserve"><value>显示标尺</value></data>
+  <data name="DevTools.Settings.ShowExtensionLines" xml:space="preserve"><value>显示延长线</value></data>
+  <data name="DevTools.Settings.Shortcuts" xml:space="preserve"><value>键盘快捷键</value></data>
+  <data name="DevTools.Settings.PickShortcut" xml:space="preserve"><value>拾取元素</value></data>
+  <data name="DevTools.Settings.RefreshShortcut" xml:space="preserve"><value>刷新当前视图</value></data>
+  <data name="DevTools.Settings.TopMostShortcut" xml:space="preserve"><value>切换窗口置顶</value></data>
+  <data name="DevTools.Settings.Metrics" xml:space="preserve"><value>指标</value></data>
+  <data name="DevTools.Settings.MetricsInterval" xml:space="preserve"><value>刷新间隔（毫秒）</value></data>
+</root>

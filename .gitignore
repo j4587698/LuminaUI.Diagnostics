@@ -1,0 +1,50 @@
+# Build output
+bin/
+obj/
+artifacts/
+publish/
+TestResults/
+BenchmarkDotNet.Artifacts/
+
+# NuGet and packages
+*.nupkg
+*.snupkg
+packages/
+project.lock.json
+project.assets.json
+
+# IDE and editor state
+.vs/
+.idea/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Logs and diagnostics
+*.log
+logs/
+*.binlog
+
+# Coverage
+coverage/
+coverage.*
+*.coverage
+*.coveragexml
+*.trx
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Local secrets/configuration
+*.DotSettings.user
+appsettings.Development.json
+secrets.json
+
+# Temporary workspace files
+*.tmp
+*.temp
+*.bak

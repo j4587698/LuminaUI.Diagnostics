@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="src/LuminaUI.Diagnostics.Abstractions/LuminaUI.Diagnostics.Abstractions.csproj" />
+  <Project Path="src/LuminaUI.Diagnostics/LuminaUI.Diagnostics.csproj" />
+  <Project Path="tools/LuminaUI.Diagnostics.Mcp/LuminaUI.Diagnostics.Mcp.csproj" />
+  <Project Path="tools/LuminaUI.Diagnostics.Desktop/LuminaUI.Diagnostics.Desktop.csproj" />
+</Solution>
