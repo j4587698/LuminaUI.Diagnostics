@@ -6,11 +6,6 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>lumina-mcp</ToolCommandName>
     <PackageId>LuminaUI.Diagnostics.Mcp</PackageId>
-    <Version>$(LuminaUIDiagnosticsMcpVersion)</Version>
-    <PackageVersion>$(LuminaUIDiagnosticsMcpVersion)</PackageVersion>
-    <AssemblyVersion>$(LuminaUIDiagnosticsMcpAssemblyVersion)</AssemblyVersion>
-    <FileVersion>$(LuminaUIDiagnosticsMcpAssemblyVersion)</FileVersion>
-    <InformationalVersion>$(LuminaUIDiagnosticsMcpVersion)</InformationalVersion>
     <Description>MCP stdio server bridge for LuminaUI diagnostics hosts.</Description>
     <PackageTags>Avalonia;UI;Diagnostics;MCP;LuminaUI;dotnet-tool</PackageTags>
   </PropertyGroup>
