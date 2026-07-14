@@ -2,11 +2,13 @@ name: Publish to NuGet
 
 on:
   push:
-    tags: ['v*']
+    branches: [main]
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
@@ -15,17 +17,52 @@ jobs:
             8.0.x
             9.0.x
             10.0.x
+
+      - name: Read version from props
+        id: version
+        shell: pwsh
+        run: |
+          $doc = [System.Xml.XmlDocument]::new()
+          $doc.Load("$pwd/Directory.Build.props")
+          $version = $doc.Project.PropertyGroup.LuminaUIDiagnosticsVersion
+          Write-Host "Detected version: $version"
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "version=$version"
+
+      - name: Check if already published on NuGet.org
+        id: check
+        shell: pwsh
+        run: |
+          $version = "${{ steps.version.outputs.version }}"
+          $pkgId = "LuminaUI.Diagnostics"
+          $url = "https://api.nuget.org/v3-flatcontainer/$($pkgId.ToLowerInvariant())/$version/$($pkgId.ToLowerInvariant()).nuspec"
+          try {
+            $null = Invoke-WebRequest -Uri $url -Method Head -TimeoutSec 15
+            Write-Host "Version $version already exists on NuGet.org — skipping publish"
+            Add-Content -Path $env:GITHUB_OUTPUT -Value "should_publish=false"
+          } catch {
+            Write-Host "Version $version is new — will publish"
+            Add-Content -Path $env:GITHUB_OUTPUT -Value "should_publish=true"
+          }
+
       - run: dotnet pack -c Release
-      - run: |
-          dotnet nuget push src/LuminaUI.Diagnostics.Abstractions/bin/Release/*.nupkg `
-            --api-key ${{ secrets.NUGET_API_KEY }} `
-            --source https://api.nuget.org/v3/index.json `
-            --skip-duplicate
-          dotnet nuget push src/LuminaUI.Diagnostics/bin/Release/*.nupkg `
-            --api-key ${{ secrets.NUGET_API_KEY }} `
-            --source https://api.nuget.org/v3/index.json `
-            --skip-duplicate
-          dotnet nuget push tools/LuminaUI.Diagnostics.Mcp/bin/Release/*.nupkg `
-            --api-key ${{ secrets.NUGET_API_KEY }} `
-            --source https://api.nuget.org/v3/index.json `
-            --skip-duplicate
+        if: steps.check.outputs.should_publish == 'true'
+
+      - name: Push packages to NuGet.org
+        if: steps.check.outputs.should_publish == 'true'
+        shell: pwsh
+        run: |
+          $apiKey = "${{ secrets.NUGET_API_KEY }}"
+          $source = "https://api.nuget.org/v3/index.json"
+          Get-ChildItem -Recurse -Filter "*.nupkg" | ForEach-Object {
+            dotnet nuget push $_.FullName --api-key $apiKey --source $source --skip-duplicate
+          }
+
+      - name: Create and push git tag
+        if: steps.check.outputs.should_publish == 'true'
+        shell: pwsh
+        run: |
+          $tag = "v${{ steps.version.outputs.version }}"
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git tag $tag
+          git push origin $tag
