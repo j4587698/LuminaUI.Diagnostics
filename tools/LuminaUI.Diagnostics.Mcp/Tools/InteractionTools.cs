@@ -9,7 +9,7 @@ namespace LuminaUI.Diagnostics.Mcp.Tools;
 public sealed class InteractionTools
 {
     [McpServerTool(Name = LuminaUIDiagnosticsToolNames.ClickControl, ReadOnly = false, Destructive = false, UseStructuredContent = true),
-     Description("Click or command-invoke a target control.")]
+     Description("Click a target control by synthesizing pointer press/release at its center through the Avalonia input pipeline (toggles ToggleButton/RadioButton); falls back to raising its click/command when pointer input is not possible.")]
     public static async Task<JsonObject> ClickControl(
         ToolForwarder forwarder,
         [Description("Node identifier from get_visual_tree/get_logical_tree responses.")] string nodeId,
@@ -55,7 +55,7 @@ public sealed class InteractionTools
     }
 
     [McpServerTool(Name = LuminaUIDiagnosticsToolNames.InputText, ReadOnly = false, Destructive = false, UseStructuredContent = true),
-     Description("Set text on a TextBox target or the first TextBox child inside a target control.")]
+     Description("Set text on a TextBox target or the first TextBox child inside a target control. Falls back to key/text-input injection for custom-drawn controls.")]
     public static async Task<JsonObject> InputText(
         ToolForwarder forwarder,
         [Description("Text to input.")] string text,
@@ -72,6 +72,28 @@ public sealed class InteractionTools
             LuminaUIDiagnosticsToolNames.InputText,
             ToolForwarder.Parameters(
                 ("text", text), ("nodeId", nodeId), ("pressEnter", pressEnter),
+                ("windowIndex", windowIndex), ("windowId", windowId)),
+            pid, pipe, timeoutMs, cancellationToken);
+        return response.Data as JsonObject ?? new JsonObject();
+    }
+
+    [McpServerTool(Name = LuminaUIDiagnosticsToolNames.SendKeys, ReadOnly = false, Destructive = false, UseStructuredContent = true),
+     Description("Focus a target control and send text as individual key down/up and text-input events, so custom-drawn controls (terminals, canvases) receive input.")]
+    public static async Task<JsonObject> SendKeys(
+        ToolForwarder forwarder,
+        [Description("Text to send to the focused control.")] string text,
+        [Description("Node identifier from get_visual_tree/get_logical_tree responses.")] string nodeId,
+        [Description("Optional window index from list_windows.")] int? windowIndex = null,
+        [Description("Window identifier from list_windows response.")] string? windowId = null,
+        [Description("Target process ID.")] int? pid = null,
+        [Description("Explicit LuminaUI.Diagnostics pipe name. Takes precedence over pid.")] string? pipe = null,
+        [Description("Maximum time in milliseconds to wait for the operation to complete.")] int timeoutMs = LuminaUIDiagnosticsProtocol.DefaultTimeoutMs,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await forwarder.ForwardAsync(
+            LuminaUIDiagnosticsToolNames.SendKeys,
+            ToolForwarder.Parameters(
+                ("text", text), ("nodeId", nodeId),
                 ("windowIndex", windowIndex), ("windowId", windowId)),
             pid, pipe, timeoutMs, cancellationToken);
         return response.Data as JsonObject ?? new JsonObject();

@@ -27,7 +27,7 @@ public sealed class DispatcherDiagnosticsClientTests
         using var registry = new NodeRegistry();
         using var client = CreateClient(button, registry);
 
-        var properties = await client.GetPropertiesAsync(new VisualTreeNodeViewModel(button));
+        var properties = await client.GetPropertiesAsync(new VisualTreeNodeViewModel(button), TestContext.Current.CancellationToken);
 
         var isEnabled = Assert.Single(properties, property => property.Name == "IsEnabled");
         Assert.True(isEnabled.IsBoolean);
@@ -64,7 +64,7 @@ public sealed class DispatcherDiagnosticsClientTests
         using var registry = new NodeRegistry();
         using var client = CreateClient(button, registry);
 
-        var resources = await client.GetResourcesAsync(node: new VisualTreeNodeViewModel(button));
+        var resources = await client.GetResourcesAsync(node: new VisualTreeNodeViewModel(button), cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal("42", Assert.Single(resources, resource => resource.Key == "count").Value);
         Assert.Equal("True", Assert.Single(resources, resource => resource.Key == "enabled").Value);
@@ -79,7 +79,7 @@ public sealed class DispatcherDiagnosticsClientTests
         store.Add(new BindingErrorEntry(DateTimeOffset.UtcNow, "Error", "Binding", "Button", "Failed binding"));
         using var client = CreateClient(button, registry, store);
 
-        var errors = await client.GetBindingErrorsAsync();
+        var errors = await client.GetBindingErrorsAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         var error = Assert.Single(errors);
         Assert.Equal("Failed binding", error.Message);
@@ -98,7 +98,7 @@ public sealed class DispatcherDiagnosticsClientTests
             new FailingSetPropertyHandler()
         };
         using var client = new DispatcherDiagnosticsClient(new DiagnosticDispatcher(handlers), registry);
-        var properties = await client.GetPropertiesAsync(new VisualTreeNodeViewModel(button));
+        var properties = await client.GetPropertiesAsync(new VisualTreeNodeViewModel(button), TestContext.Current.CancellationToken);
         var width = Assert.Single(properties, property => property.Name == "Width");
 
         width.UpdateValue(123d);

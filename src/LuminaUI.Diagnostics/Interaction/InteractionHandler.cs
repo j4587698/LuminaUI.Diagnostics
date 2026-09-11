@@ -6,8 +6,10 @@ using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Input.Raw;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using LuminaUI.Diagnostics.Controls;
 using LuminaUI.Diagnostics.Dispatch;
 using LuminaUI.Diagnostics.Inspection;
@@ -47,6 +49,7 @@ public sealed class InteractionHandler : IDiagnosticToolHandler
             InteractionKind.Click => LuminaUIDiagnosticsToolNames.ClickControl,
             InteractionKind.SetProperty => LuminaUIDiagnosticsToolNames.SetProperty,
             InteractionKind.InputText => LuminaUIDiagnosticsToolNames.InputText,
+            InteractionKind.SendKeys => LuminaUIDiagnosticsToolNames.SendKeys,
             InteractionKind.InvokeCommand => LuminaUIDiagnosticsToolNames.InvokeCommand,
             InteractionKind.WaitForProperty => LuminaUIDiagnosticsToolNames.WaitForProperty,
             _ => throw new InvalidOperationException("Unknown interaction kind.")
@@ -73,6 +76,13 @@ public sealed class InteractionHandler : IDiagnosticToolHandler
         NodeRegistry? nodeRegistry = null,
         Func<IReadOnlyList<Control>>? getRoots = null) =>
         new(InteractionKind.InputText, invoker, controlResolver, nodeRegistry: nodeRegistry, getRoots: getRoots);
+
+    public static InteractionHandler SendKeys(
+        IUiThreadInvoker invoker,
+        IControlResolver? controlResolver = null,
+        NodeRegistry? nodeRegistry = null,
+        Func<IReadOnlyList<Control>>? getRoots = null) =>
+        new(InteractionKind.SendKeys, invoker, controlResolver, nodeRegistry: nodeRegistry, getRoots: getRoots);
 
     public static InteractionHandler InvokeCommand(
         IUiThreadInvoker invoker,
@@ -104,6 +114,7 @@ public sealed class InteractionHandler : IDiagnosticToolHandler
             InteractionKind.Click => Task.FromResult(Click(request)),
             InteractionKind.SetProperty => Task.FromResult(SetProperty(request)),
             InteractionKind.InputText => InputTextAsync(request, cancellationToken),
+            InteractionKind.SendKeys => Task.FromResult(SendKeys(request)),
             InteractionKind.InvokeCommand => Task.FromResult(InvokeCommand(request)),
             InteractionKind.WaitForProperty => WaitForPropertyAsync(request, cancellationToken),
             _ => Task.FromResult(
@@ -122,6 +133,13 @@ public sealed class InteractionHandler : IDiagnosticToolHandler
         var control = lookup.Control!;
         control.Focus();
 
+        if (TryPointerClick(control))
+        {
+            return Ok(request, "pointerClicked");
+        }
+
+        // Fallback for controls that cannot receive synthesized pointer input
+        // (not attached to a visual root, hit-test invisible, ...).
         if (control is Button button)
         {
             if (button.Command is null)
@@ -246,10 +264,9 @@ public sealed class InteractionHandler : IDiagnosticToolHandler
 
         if (textBox is null)
         {
-            return DiagnosticResponse.Fail(
-                request.Id,
-                DiagnosticErrorCode.UnsupportedOperation,
-                "Target control is not a TextBox and does not contain an editable TextBox.");
+            // No editable TextBox: fall back to key/text-input injection so
+            // custom-drawn controls (terminals, canvases) can receive text.
+            return SendKeysCore(request, lookup.Control!, text, pressEnter, cancellationToken);
         }
 
         textBox.Focus();
@@ -272,6 +289,164 @@ public sealed class InteractionHandler : IDiagnosticToolHandler
                 ["pressEnterRequested"] = pressEnter,
                 ["enterPressed"] = enterPressed
             });
+    }
+
+    private DiagnosticResponse SendKeys(DiagnosticRequest request)
+    {
+        var lookup = ResolveRequiredControl(request);
+        if (!lookup.Success)
+            return lookup.Response!;
+
+        var text = InspectionRequestHelpers.GetString(request.Parameters, "text");
+        if (text is null)
+        {
+            return DiagnosticResponse.Fail(
+                request.Id,
+                DiagnosticErrorCode.InvalidRequest,
+                "Parameter 'text' is required.");
+        }
+
+        return SendKeysCore(request, lookup.Control!, text, pressEnter: false, CancellationToken.None);
+    }
+
+    private static DiagnosticResponse SendKeysCore(
+        DiagnosticRequest request,
+        Control target,
+        string text,
+        bool pressEnter,
+        CancellationToken cancellationToken)
+    {
+        target.Focus();
+
+        cancellationToken.ThrowIfCancellationRequested();
+        var characters = SendText(target, text);
+
+        var enterPressed = false;
+        if (pressEnter)
+        {
+            RaiseReturnKey(target);
+            enterPressed = true;
+        }
+
+        return DiagnosticResponse.Ok(
+            request.Id,
+            new JsonObject
+            {
+                ["status"] = "keysSent",
+                ["characters"] = characters,
+                ["pressEnterRequested"] = pressEnter,
+                ["enterPressed"] = enterPressed
+            });
+    }
+
+    private static int SendText(
+        IInputElement target,
+        string text)
+    {
+        var count = 0;
+        var index = 0;
+        while (index < text.Length)
+        {
+            var length = char.IsHighSurrogate(text[index]) && index + 1 < text.Length ? 2 : 1;
+            var chunk = text.Substring(index, length);
+            index += length;
+
+            var key = MapCharToKey(chunk[0]);
+            if (key != Key.None)
+            {
+                target.RaiseEvent(new KeyEventArgs
+                {
+                    RoutedEvent = InputElement.KeyDownEvent,
+                    Source = target,
+                    Key = key,
+                    KeyModifiers = KeyModifiers.None
+                });
+            }
+
+            target.RaiseEvent(new TextInputEventArgs
+            {
+                RoutedEvent = InputElement.TextInputEvent,
+                Source = target,
+                Text = chunk
+            });
+
+            if (key != Key.None)
+            {
+                target.RaiseEvent(new KeyEventArgs
+                {
+                    RoutedEvent = InputElement.KeyUpEvent,
+                    Source = target,
+                    Key = key,
+                    KeyModifiers = KeyModifiers.None
+                });
+            }
+
+            count++;
+        }
+
+        return count;
+    }
+
+    private static Key MapCharToKey(char c) =>
+        c switch
+        {
+            >= 'a' and <= 'z' => Key.A + (c - 'a'),
+            >= 'A' and <= 'Z' => Key.A + (c - 'A'),
+            >= '0' and <= '9' => Key.D0 + (c - '0'),
+            ' ' => Key.Space,
+            '\r' or '\n' => Key.Return,
+            '\t' => Key.Tab,
+            _ => Key.None
+        };
+
+    private static bool TryPointerClick(Control control)
+    {
+        if (!control.IsEffectivelyEnabled
+            || !control.IsEffectivelyVisible
+            || !control.IsHitTestVisible)
+        {
+            return false;
+        }
+
+        if (TopLevel.GetTopLevel(control) is not { } rootVisual)
+            return false;
+
+        var bounds = control.Bounds;
+        if (bounds.Width <= 0 || bounds.Height <= 0)
+            return false;
+
+        var rootPosition = control.TranslatePoint(
+            new Point(bounds.Width / 2, bounds.Height / 2),
+            rootVisual);
+        if (rootPosition is null)
+            return false;
+
+        var pointer = new Avalonia.Input.Pointer(
+            Avalonia.Input.Pointer.GetNextFreeId(),
+            PointerType.Mouse,
+            isPrimary: true);
+        var timestamp = (ulong)Math.Max(0, Environment.TickCount64);
+
+        control.RaiseEvent(new PointerPressedEventArgs(
+            control,
+            pointer,
+            rootVisual,
+            rootPosition.Value,
+            timestamp,
+            new PointerPointProperties(RawInputModifiers.LeftMouseButton, PointerUpdateKind.LeftButtonPressed),
+            KeyModifiers.None));
+
+        control.RaiseEvent(new PointerReleasedEventArgs(
+            control,
+            pointer,
+            rootVisual,
+            rootPosition.Value,
+            timestamp + 1,
+            new PointerPointProperties(RawInputModifiers.None, PointerUpdateKind.LeftButtonReleased),
+            KeyModifiers.None,
+            MouseButton.Left));
+
+        return true;
     }
 
     private DiagnosticResponse InvokeCommand(DiagnosticRequest request)
@@ -526,19 +701,19 @@ public sealed class InteractionHandler : IDiagnosticToolHandler
             || string.Equals(type.FullName, typeName, StringComparison.Ordinal);
     }
 
-    private static void RaiseReturnKey(TextBox textBox)
+    private static void RaiseReturnKey(IInputElement target)
     {
-        textBox.RaiseEvent(new KeyEventArgs
+        target.RaiseEvent(new KeyEventArgs
         {
             RoutedEvent = InputElement.KeyDownEvent,
-            Source = textBox,
+            Source = target,
             Key = Key.Return,
             KeyModifiers = KeyModifiers.None
         });
-        textBox.RaiseEvent(new KeyEventArgs
+        target.RaiseEvent(new KeyEventArgs
         {
             RoutedEvent = InputElement.KeyUpEvent,
-            Source = textBox,
+            Source = target,
             Key = Key.Return,
             KeyModifiers = KeyModifiers.None
         });
@@ -556,6 +731,7 @@ public sealed class InteractionHandler : IDiagnosticToolHandler
         Click,
         SetProperty,
         InputText,
+        SendKeys,
         InvokeCommand,
         WaitForProperty
     }

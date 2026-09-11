@@ -7,6 +7,7 @@ using LuminaUI.Diagnostics.Dispatch;
 using LuminaUI.Diagnostics.Inspection;
 using LuminaUI.Diagnostics.Threading;
 using LuminaUI.Diagnostics.Abstractions;
+using SkiaSharp;
 
 namespace LuminaUI.Diagnostics.Visual;
 
@@ -56,6 +57,14 @@ public sealed class ScreenshotHandler : IDiagnosticToolHandler
         if (!target.Success)
             return target.Response!;
 
+        if (!TryCreateOptions(request, out var options, out var saveToFile, out var optionsError))
+        {
+            return DiagnosticResponse.Fail(
+                request.Id,
+                DiagnosticErrorCode.InvalidRequest,
+                optionsError!);
+        }
+
         var pixelSize = GetPixelSize(target.Control!);
         if (pixelSize.Width <= 0 || pixelSize.Height <= 0)
         {
@@ -75,19 +84,43 @@ public sealed class ScreenshotHandler : IDiagnosticToolHandler
             using var bitmap = new RenderTargetBitmap(pixelSize);
             bitmap.Render(target.Control!);
 
-            using var stream = new MemoryStream();
-            bitmap.Save(stream);
+            using var pngStream = new MemoryStream();
+            bitmap.Save(pngStream);
+            pngStream.Position = 0;
+
+            using var source = SKBitmap.Decode(pngStream);
+            if (source is null)
+            {
+                return DiagnosticResponse.Fail(
+                    request.Id,
+                    DiagnosticErrorCode.InternalError,
+                    "Screenshot capture failed: could not decode the rendered frame.");
+            }
+
+            var processed = ScreenshotImageProcessor.Process(source, options);
+
+            if (!string.IsNullOrWhiteSpace(saveToFile))
+                return SaveToFile(request, processed, saveToFile);
 
             return DiagnosticResponse.Ok(
                 request.Id,
                 new JsonObject
                 {
-                    ["format"] = "png",
-                    ["mimeType"] = "image/png",
-                    ["width"] = pixelSize.Width,
-                    ["height"] = pixelSize.Height,
-                    ["base64"] = Convert.ToBase64String(stream.ToArray())
+                    ["format"] = processed.Format,
+                    ["mimeType"] = processed.MimeType,
+                    ["width"] = processed.Width,
+                    ["height"] = processed.Height,
+                    ["bytes"] = processed.Bytes.Length,
+                    ["frameHash"] = processed.FrameHash,
+                    ["base64"] = Convert.ToBase64String(processed.Bytes)
                 });
+        }
+        catch (ArgumentOutOfRangeException ex)
+        {
+            return DiagnosticResponse.Fail(
+                request.Id,
+                DiagnosticErrorCode.InvalidRequest,
+                ex.Message);
         }
         catch (Exception ex)
         {
@@ -95,6 +128,83 @@ public sealed class ScreenshotHandler : IDiagnosticToolHandler
                 request.Id,
                 DiagnosticErrorCode.InternalError,
                 $"Screenshot capture failed: {ex.Message}");
+        }
+    }
+
+    private static bool TryCreateOptions(
+        DiagnosticRequest request,
+        out ScreenshotImageOptions options,
+        out string? saveToFile,
+        out string? error)
+    {
+        options = ScreenshotImageOptions.Default;
+        saveToFile = InspectionRequestHelpers.GetString(request.Parameters, "saveToFile");
+        error = null;
+
+        if (!ScreenshotImageProcessor.TryParseFormat(
+                InspectionRequestHelpers.GetString(request.Parameters, "format"),
+                out var format))
+        {
+            error = "Parameter 'format' must be 'png' or 'jpeg'.";
+            return false;
+        }
+
+        if (!ScreenshotImageProcessor.TryParseCrop(
+                InspectionRequestHelpers.GetString(request.Parameters, "crop"),
+                out var crop,
+                out var cropError))
+        {
+            error = cropError;
+            return false;
+        }
+
+        var maxWidth = InspectionRequestHelpers.GetInt(request.Parameters, "maxWidth", 0);
+        var quality = Math.Clamp(
+            InspectionRequestHelpers.GetInt(request.Parameters, "quality", 80),
+            1,
+            100);
+
+        options = new ScreenshotImageOptions(
+            maxWidth > 0 ? maxWidth : null,
+            format,
+            quality,
+            crop.Width > 0 ? crop : null);
+        return true;
+    }
+
+    internal static DiagnosticResponse SaveToFile(
+        DiagnosticRequest request,
+        ProcessedScreenshot processed,
+        string saveToFile)
+    {
+        try
+        {
+            var fullPath = Path.GetFullPath(saveToFile);
+            var directory = Path.GetDirectoryName(fullPath);
+            if (!string.IsNullOrEmpty(directory))
+                Directory.CreateDirectory(directory);
+
+            File.WriteAllBytes(fullPath, processed.Bytes);
+
+            return DiagnosticResponse.Ok(
+                request.Id,
+                new JsonObject
+                {
+                    ["path"] = fullPath,
+                    ["format"] = processed.Format,
+                    ["mimeType"] = processed.MimeType,
+                    ["width"] = processed.Width,
+                    ["height"] = processed.Height,
+                    ["bytes"] = processed.Bytes.Length,
+                    ["frameHash"] = processed.FrameHash
+                });
+        }
+        catch (Exception ex)
+        {
+            return DiagnosticResponse.Fail(
+                request.Id,
+                DiagnosticErrorCode.InternalError,
+                $"Saving the screenshot to '{saveToFile}' failed: {ex.Message}");
         }
     }
 

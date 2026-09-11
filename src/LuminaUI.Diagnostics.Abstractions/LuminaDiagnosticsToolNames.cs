@@ -31,6 +31,7 @@ public static class LuminaUIDiagnosticsToolNames
     public const string ClickControl = "click_control";
     public const string SetProperty = "set_property";
     public const string InputText = "input_text";
+    public const string SendKeys = "send_keys";
     public const string InvokeCommand = "invoke_command";
 
     public const string TakeScreenshot = "take_screenshot";
