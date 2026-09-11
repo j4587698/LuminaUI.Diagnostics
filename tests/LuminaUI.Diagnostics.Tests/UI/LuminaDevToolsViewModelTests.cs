@@ -16,13 +16,13 @@ public sealed class LuminaDevToolsViewModelTests
         using var viewModel = new LuminaDevToolsViewModel(client);
 
         viewModel.SelectedNode = new VisualTreeNodeViewModel(firstControl);
-        await client.FirstRequestStarted.Task.WaitAsync(TimeSpan.FromSeconds(2));
+        await client.FirstRequestStarted.Task.WaitAsync(TimeSpan.FromSeconds(2), TestContext.Current.CancellationToken);
 
         viewModel.SelectedNode = new VisualTreeNodeViewModel(secondControl);
         await WaitUntilAsync(() => viewModel.Properties.SingleOrDefault()?.Name == "Second");
 
         client.ReleaseFirstRequest.TrySetResult();
-        await Task.Delay(50);
+        await Task.Delay(50, TestContext.Current.CancellationToken);
 
         Assert.Equal("Second", Assert.Single(viewModel.Properties).Name);
     }

@@ -50,6 +50,7 @@ public static class DiagnosticsServiceFactory
             .Add(InteractionHandler.ClickControl(invoker, resolver, nodeRegistry))
             .Add(InteractionHandler.SetProperty(invoker, resolver, propertyValueConverter, nodeRegistry))
             .Add(InteractionHandler.InputText(invoker, resolver, nodeRegistry))
+            .Add(InteractionHandler.SendKeys(invoker, resolver, nodeRegistry))
             .Add(InteractionHandler.InvokeCommand(invoker, resolver, nodeRegistry))
             .Add(InteractionHandler.WaitForProperty(invoker, resolver, nodeRegistry))
             .Add(new ScreenshotHandler(invoker, resolver, nodeRegistry))

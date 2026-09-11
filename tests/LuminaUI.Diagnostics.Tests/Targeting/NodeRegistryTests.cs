@@ -179,6 +179,34 @@ public sealed class NodeRegistryTests
         Assert.Equal(DiagnosticErrorCode.InvalidRequest, resolution.Response.Error?.Code);
     }
 
+    [Fact]
+    public void NodeRegistry_ResolveFromRequest_NodeIdInControlId_ResolvesViaRegistry()
+    {
+        var registry = new NodeRegistry();
+        var control = new Button { Name = "registeredButton" };
+        var nodeId = registry.RegisterNode(control);
+
+        var request = new DiagnosticRequest("req1", "test", new() { ["controlId"] = nodeId }, 5000);
+        var resolution = registry.ResolveFromRequest(request, [control], new Controls.AvaloniaControlResolver());
+
+        Assert.True(resolution.Success);
+        Assert.Same(control, resolution.Control);
+        Assert.Equal(nodeId, resolution.NodeId);
+    }
+
+    [Fact]
+    public void NodeRegistry_ResolveFromRequest_UnknownControlId_StillFails()
+    {
+        var registry = new NodeRegistry();
+
+        var request = new DiagnosticRequest("req1", "test", new() { ["controlId"] = "#missing" }, 5000);
+        var resolution = registry.ResolveFromRequest(request, [new Button()], new Controls.AvaloniaControlResolver());
+
+        Assert.False(resolution.Success);
+        Assert.NotNull(resolution.Response);
+        Assert.Equal(DiagnosticErrorCode.TargetNotFound, resolution.Response.Error?.Code);
+    }
+
     private static string RegisterAndForget(NodeRegistry registry)
     {
         var temp = new Button { Name = "temp" };

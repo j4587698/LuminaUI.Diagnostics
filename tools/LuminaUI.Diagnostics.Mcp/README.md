@@ -76,5 +76,8 @@ discover_apps -> connect_app(pid) -> list_windows -> ...
 - `get_control_properties`：读取控件属性。
 - `get_data_context`：读取 DataContext。
 - `get_binding_errors`：读取绑定错误。
-- `take_screenshot`：截取窗口或控件截图。
-- `click_control` / `input_text` / `set_property` / `invoke_command`：执行基础交互。
+- `take_screenshot`：截取窗口或控件截图。支持 `maxWidth`（等比缩放）、`format`/`quality`（jpeg 压缩）、`crop`（"x,y,w,h" 裁剪）缩小回传体积；传 `saveToFile` 时写入文件（重复调用覆盖），只回传元数据（path/width/height/bytes/frameHash）不回传图像。
+- `click_control`：在控件中心合成指针按下/抬起事件（走 Avalonia 输入管线，可翻转 ToggleButton/RadioButton）；无法接收指针输入时回退为直接触发 Click/Command。
+- `input_text`：向 TextBox 或其子 TextBox 写入文本；目标不是 TextBox 时回退为逐字符按键注入。
+- `send_keys`：聚焦目标后逐字符发送 KeyDown/KeyUp 与 TextInput 事件，自绘控件（终端、画布）也能接收文本。
+- `set_property` / `invoke_command`：设置属性、调用命令。

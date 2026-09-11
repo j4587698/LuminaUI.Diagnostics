@@ -214,7 +214,7 @@ public sealed class NodeRegistry : IDisposable
         return ReferenceEquals(control, root);
     }
 
-    private static NodeResolution ResolveLegacy(
+    private NodeResolution ResolveLegacy(
         DiagnosticRequest request,
         IReadOnlyList<Control> roots,
         IControlResolver resolver)
@@ -225,6 +225,22 @@ public sealed class NodeRegistry : IDisposable
             return NodeResolution.Failed(
                 DiagnosticResponse.Fail(request.Id, DiagnosticErrorCode.InvalidRequest,
                     "Parameter 'controlId' or 'nodeId' is required."));
+        }
+
+        // Accept node identifiers issued by find_control/get_visual_tree/get_logical_tree
+        // in the 'controlId' parameter as well.
+        if (TryResolveNode(controlId, out var nodeControl))
+        {
+            for (var i = 0; i < roots.Count; i++)
+            {
+                if (IsDescendantOf(nodeControl!, roots[i]))
+                    return NodeResolution.Found(nodeControl!, i, controlId);
+            }
+
+            return NodeResolution.Failed(
+                DiagnosticResponse.Fail(request.Id, DiagnosticErrorCode.TargetNotFound,
+                    $"Node '{controlId}' is stale or was destroyed. Re-resolve the control.",
+                    new JsonObject { ["controlId"] = controlId }));
         }
 
         if (!ControlIdentifierParser.TryParse(controlId, out var identifier, out var error))
