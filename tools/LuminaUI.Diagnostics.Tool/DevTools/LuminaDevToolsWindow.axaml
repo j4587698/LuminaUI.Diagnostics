@@ -6,7 +6,7 @@
                  xmlns:l10n="clr-namespace:LuminaUI.Localization;assembly=LuminaUI"
                  x:Class="LuminaUI.Diagnostics.UI.LuminaDevToolsWindow"
                  Title="{l10n:Loc DevTools.Title}"
-                 Icon="avares://LuminaUI.Diagnostics/Assets/DevToolsIcon.png"
+                 Icon="avares://LuminaUI.Diagnostics.Tool/Assets/DevToolsIcon.png"
                  Width="1280"
                  Height="760"
                  MinWidth="980"
@@ -438,9 +438,9 @@
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Padding" Value="5,4,3,6" />
         </Style>
-        <Style Selector="TreeView.devtool-tree TreeViewItem">
-            <Setter Property="IsExpanded" Value="{ReflectionBinding IsExpanded}" />
-            <Setter Property="IsSelected" Value="{ReflectionBinding IsSelected, Mode=TwoWay}" />
+        <Style Selector="TreeView.devtool-tree TreeViewItem" x:DataType="vm:VisualTreeNodeViewModel">
+            <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
             <Setter Property="MinHeight" Value="28" />
             <Setter Property="Margin" Value="0,1" />
             <Setter Property="CornerRadius" Value="4" />
@@ -845,7 +845,7 @@
         <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
             <Image Width="22"
                    Height="22"
-                   Source="avares://LuminaUI.Diagnostics/Assets/DevToolsIcon.png" />
+                   Source="avares://LuminaUI.Diagnostics.Tool/Assets/DevToolsIcon.png" />
             <TextBlock Text="{l10n:Loc DevTools.Title}"
                        Foreground="{StaticResource DevToolsTextBrush}"
                        FontSize="13"

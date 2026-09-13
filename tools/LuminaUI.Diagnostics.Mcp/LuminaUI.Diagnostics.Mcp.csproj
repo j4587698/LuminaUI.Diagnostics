@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -6,20 +6,17 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>lumina-mcp</ToolCommandName>
     <PackageId>LuminaUI.Diagnostics.Mcp</PackageId>
-    <Description>MCP stdio server bridge for LuminaUI diagnostics hosts.</Description>
+    <Version>$(LuminaUIDiagnosticsVersion)</Version>
+    <PackageVersion>$(LuminaUIDiagnosticsVersion)</PackageVersion>
+    <AssemblyVersion>$(LuminaUIDiagnosticsAssemblyVersion)</AssemblyVersion>
+    <FileVersion>$(LuminaUIDiagnosticsAssemblyVersion)</FileVersion>
+    <InformationalVersion>$(LuminaUIDiagnosticsVersion)</InformationalVersion>
+    <Description>MCP stdio server bridge for LuminaUI diagnostics hosts (compatibility tool package).</Description>
     <PackageTags>Avalonia;UI;Diagnostics;MCP;LuminaUI;dotnet-tool</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="LuminaUI.Diagnostics.Tests" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Hosting" />
-    <PackageReference Include="ModelContextProtocol" />
-    <ProjectReference Include="..\..\src\LuminaUI.Diagnostics.Abstractions\LuminaUI.Diagnostics.Abstractions.csproj" />
+    <ProjectReference Include="..\LuminaUI.Diagnostics.Tool\LuminaUI.Diagnostics.Tool.csproj" />
   </ItemGroup>
 
 </Project>
-
-

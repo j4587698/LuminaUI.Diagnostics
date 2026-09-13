@@ -20,7 +20,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\LuminaUI.Diagnostics.Abstractions\LuminaUI.Diagnostics.Abstractions.csproj" />
     <ProjectReference Include="..\..\src\LuminaUI.Diagnostics\LuminaUI.Diagnostics.csproj" />
-    <ProjectReference Include="..\..\tools\LuminaUI.Diagnostics.Mcp\LuminaUI.Diagnostics.Mcp.csproj" />
+    <ProjectReference Include="..\..\tools\LuminaUI.Diagnostics.Tool\LuminaUI.Diagnostics.Tool.csproj" />
   </ItemGroup>
 
 </Project>

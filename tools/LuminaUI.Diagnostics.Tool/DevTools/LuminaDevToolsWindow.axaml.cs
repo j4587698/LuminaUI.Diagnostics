@@ -41,74 +41,90 @@ public partial class LuminaDevToolsWindow : LuminaUI.Controls.LuminaWindow
 
     private async Task BringNodeIntoViewAsync(VisualTreeNodeViewModel node)
     {
+        await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Loaded);
+
         var (tree, roots) = _viewModel.SelectedTreeTabIndex switch
         {
             1 => (VisualTreeView, _viewModel.VisualTree.AsEnumerable()),
             2 => (LogicalTreeView, _viewModel.LogicalTree.AsEnumerable()),
             _ => (MergedTreeView, _viewModel.MergedTree.AsEnumerable())
         };
+
         var path = new List<VisualTreeNodeViewModel>();
         if (!TryBuildNodePath(roots, node, path))
             return;
 
+        // 1. Expand all ancestors in the data model
+        for (var i = 0; i < path.Count - 1; i++)
+        {
+            path[i].IsExpanded = true;
+        }
+
+        node.IsSelected = true;
         tree.SelectedItem = node;
-        var realizedContainer = await Dispatcher.UIThread.InvokeAsync(
-            () => tree.GetVisualDescendants()
-                .OfType<TreeViewItem>()
-                .FirstOrDefault(item => ReferenceEquals(item.DataContext, node)),
-            DispatcherPriority.Loaded);
-        if (realizedContainer is not null)
+
+        // 2. Step down the visual tree of TreeViewItem containers, expanding each level
+        ItemsControl currentParent = tree;
+        TreeViewItem? targetItem = null;
+
+        for (var i = 0; i < path.Count; i++)
         {
-            realizedContainer.IsSelected = true;
-            realizedContainer.BringIntoView();
-            return;
-        }
-
-        ItemsControl itemsControl = tree;
-        TreeViewItem? targetContainer = null;
-        for (var index = 0; index < path.Count; index++)
-        {
-            var pathNode = path[index];
-            targetContainer = await GetTreeItemContainerAsync(itemsControl, pathNode);
-            if (targetContainer is null)
-                return;
-
-            if (index < path.Count - 1)
-                targetContainer.IsExpanded = true;
-
-            itemsControl = targetContainer;
-        }
-
-        await Dispatcher.UIThread.InvokeAsync(() =>
-        {
-            tree.SelectedItem = node;
-            if (targetContainer is not null)
-            {
-                targetContainer.IsSelected = true;
-                targetContainer.BringIntoView();
-            }
-        }, DispatcherPriority.Loaded);
-    }
-
-    private static async Task<TreeViewItem?> GetTreeItemContainerAsync(
-        ItemsControl itemsControl,
-        VisualTreeNodeViewModel node)
-    {
-        const int maxAttempts = 2;
-        for (var attempt = 0; attempt < maxAttempts; attempt++)
-        {
+            var pathNode = path[i];
             TreeViewItem? container = null;
-            await Dispatcher.UIThread.InvokeAsync(() =>
-            {
-                itemsControl.ScrollIntoView(node);
-                container = itemsControl.ContainerFromItem(node) as TreeViewItem;
-            }, DispatcherPriority.Loaded);
 
-            if (container is not null)
-                return container;
+            for (var attempt = 0; attempt < 8; attempt++)
+            {
+                currentParent.ScrollIntoView(pathNode);
+                await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Loaded);
+                await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Render);
+
+                container = currentParent.ContainerFromItem(pathNode) as TreeViewItem
+                    ?? currentParent.GetVisualDescendants()
+                        .OfType<TreeViewItem>()
+                        .FirstOrDefault(tvi => ReferenceEquals(tvi.DataContext, pathNode)
+                            || (tvi.DataContext is VisualTreeNodeViewModel vm && vm.Identity is not null && Equals(vm.Identity, pathNode.Identity)));
+
+                if (container is not null)
+                    break;
+
+                await Task.Delay(20);
+            }
+
+            if (container is null)
+                break;
+
+            if (i < path.Count - 1)
+            {
+                container.IsExpanded = true;
+            }
+            else
+            {
+                targetItem = container;
+            }
+
+            currentParent = container;
         }
 
-        return null;
+        // 3. Fallback search across the tree's visual descendants
+        if (targetItem is null)
+        {
+            await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Render);
+            targetItem = tree.GetVisualDescendants()
+                .OfType<TreeViewItem>()
+                .FirstOrDefault(tvi => ReferenceEquals(tvi.DataContext, node)
+                    || (tvi.DataContext is VisualTreeNodeViewModel vm && vm.Identity is not null && Equals(vm.Identity, node.Identity)));
+        }
+
+        if (targetItem is not null)
+        {
+            targetItem.IsSelected = true;
+            targetItem.BringIntoView();
+            targetItem.Focus();
+        }
+        else
+        {
+            tree.ScrollIntoView(node);
+        }
     }
 
     private static bool TryBuildNodePath(
@@ -120,6 +136,7 @@ public partial class LuminaDevToolsWindow : LuminaUI.Controls.LuminaWindow
         {
             path.Add(node);
             if (ReferenceEquals(node, target)
+                || (node.Identity is not null && target.Identity is not null && Equals(node.Identity, target.Identity))
                 || TryBuildNodePath(node.Children, target, path))
             {
                 return true;

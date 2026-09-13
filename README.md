@@ -2,7 +2,9 @@
 
 [中文说明](README.zh-CN.md)
 
-Real-time diagnostics infrastructure for [LuminaUI](https://github.com/anomalyco/LuminaUI) — an Avalonia component library. Exposes the visual/logical tree, properties, data context, styles, resources, and binding errors of a running Avalonia application over a named-pipe protocol, plus an [MCP](https://modelcontextprotocol.io) stdio server for AI tooling (e.g. opencode).
+Real-time diagnostics infrastructure for Avalonia applications. Exposes the visual/logical tree, properties, data context, styles, resources, and binding errors of a running Avalonia application over a named-pipe protocol. Features a unified CLI and desktop tool `lumina`, providing both an [MCP](https://modelcontextprotocol.io) stdio server (for AI tools like opencode, Cursor, VS Code) and an out-of-process DevTools desktop UI.
+
+> **Zero UI Pollution**: The host package `LuminaUI.Diagnostics` depends purely on Avalonia with **zero third-party UI dependencies**. The DevTools UI is entirely hosted in an isolated `lumina` external process.
 
 ---
 
@@ -10,9 +12,9 @@ Real-time diagnostics infrastructure for [LuminaUI](https://github.com/anomalyco
 
 | Package | Type | Description |
 | --- | --- | --- |
-| `LuminaUI.Diagnostics.Abstractions` | NuGet | Shared named-pipe protocol contracts for host, client, and MCP tooling. |
-| `LuminaUI.Diagnostics` | NuGet | Application-side diagnostics host that exposes the control tree, properties, data context, styles, resources, and binding errors over a named pipe. |
-| `LuminaUI.Diagnostics.Mcp` | dotnet tool | MCP stdio server that connects to a running diagnostics host and exposes its capabilities to MCP clients. |
+| `LuminaUI.Diagnostics.Abstractions` | NuGet | Shared named-pipe protocol contracts for host, client, and tools. |
+| `LuminaUI.Diagnostics` | NuGet | Application-side lightweight diagnostics host that exposes the control tree, properties, data context, styles, resources, and binding errors over a named pipe (pure Avalonia). |
+| `LuminaUI.Diagnostics.Tool` | dotnet tool | Unified diagnostics tool (command `lumina`), including MCP stdio server and standalone process-level DevTools. |
 
 ---
 
@@ -40,9 +42,9 @@ public static AppBuilder BuildAvaloniaApp()
 #endif
 ```
 
-`UseLuminaUIDiagnostics()` starts the named-pipe server and registers F12 to open the DevTools window by default.
+`UseLuminaUIDiagnostics()` starts the named-pipe server and launches the external `lumina` DevTools when F12 is pressed.
 
-Disable the DevTools window if you only need MCP:
+Disable DevTools launcher if you only need MCP:
 
 ```csharp
 .UseLuminaUIDiagnostics(o => o.EnableDevTools = false);
@@ -56,35 +58,39 @@ Custom shortcut:
 });
 ```
 
-### 2. Use the MCP tool
+---
 
-Install the global tool (traditional):
+### 2. Install and use the unified tool (`lumina`)
 
-```bash
-dotnet tool install -g LuminaUI.Diagnostics.Mcp
-lumina-mcp
-```
-
-.NET 10+ users can run on-the-fly with `dnx` (like `npx`):
+Install the global tool once:
 
 ```bash
-dnx lumina-mcp
+dotnet tool install -g LuminaUI.Diagnostics.Tool
 ```
 
-Then configure your MCP client (opencode, VS Code, etc.):
+.NET 10+ users can also run on-the-fly with `dnx`:
+
+```bash
+dnx lumina --help
+```
+
+#### A. Run as MCP Server (for AI clients)
+
+Configure your MCP client (opencode, Cursor, VS Code, Claude Desktop):
 
 ```json
 {
   "servers": {
     "LuminaUI.Diagnostics": {
       "type": "stdio",
-      "command": "lumina-mcp"
+      "command": "lumina",
+      "args": ["mcp"]
     }
   }
 }
 ```
 
-For the `dnx` one-shot approach:
+For the `dnx` on-the-fly approach:
 
 ```json
 {
@@ -92,20 +98,30 @@ For the `dnx` one-shot approach:
     "LuminaUI.Diagnostics": {
       "type": "stdio",
       "command": "dnx",
-      "args": ["lumina-mcp"]
+      "args": ["lumina", "mcp"]
     }
   }
 }
 ```
 
-### 3. Standalone DevTools window
+#### B. Run as standalone DevTools window
 
-`tools/LuminaUI.Diagnostics.Desktop` is a standalone desktop process that connects to the app over a named pipe and provides a DevTools window (the host must be started with `options.StartImmediately = true` or `UseLuminaUIDiagnostics()`).
+```bash
+# Launch DevTools (auto-discovers and connects to running Avalonia apps)
+lumina
+
+# Or specify the subcommand
+lumina devtools
+
+# Or connect to a specific process and pipe
+lumina devtools --target-pid 12345 --pipe lumina-diag-12345
+```
 
 ---
 
 ## Features
 
+- **Process-level isolation** — DevTools runs in its own process, avoiding GC, memory pressure, and theme conflicts in target apps
 - **Tree inspection** — Visual/logical tree traversal, search by name, type, or text
 - **Property editing** — Read and set Avalonia properties (StyledProperty / DirectProperty / CLR)
 - **Data context** — View DataContext type and property values, expand collections
@@ -119,16 +135,24 @@ For the `dnx` one-shot approach:
 
 ---
 
-## Build
+## Build & Test
+
+Build the solution:
 
 ```bash
 dotnet build
 ```
 
-Test:
+Run unit tests:
 
 ```bash
 dotnet test
+```
+
+Pack global tool:
+
+```bash
+dotnet pack tools/LuminaUI.Diagnostics.Tool
 ```
 
 ---

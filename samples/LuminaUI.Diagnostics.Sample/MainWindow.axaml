@@ -1,0 +1,48 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="LuminaUI.Diagnostics.Sample.MainWindow"
+        Title="LuminaUI Diagnostics Sample"
+        Width="700" Height="500"
+        WindowStartupLocation="CenterScreen">
+    <Grid Margin="24" RowDefinitions="Auto,*,Auto">
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Spacing="6" Margin="0,0,0,16">
+            <TextBlock Text="LuminaUI Diagnostics 示例程序" FontSize="22" FontWeight="Bold" />
+            <TextBlock Text="💡 提示：在此窗口处于激活状态时按下【F12】，即可自动拉起独立的 Lumina DevTools 调试器！"
+                       Foreground="#3B82F6" FontSize="13" TextWrapping="Wrap" />
+        </StackPanel>
+
+        <!-- Interactive controls area -->
+        <Border Grid.Row="1" Background="#0A000000" CornerRadius="8" Padding="16">
+            <ScrollViewer>
+                <StackPanel Spacing="16">
+                    <TextBlock Text="基础控件测试" FontWeight="SemiBold" FontSize="16" />
+
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Button Name="PrimaryButton" Content="主要按钮" />
+                        <Button Name="SecondaryButton" Content="次要按钮" />
+                        <ToggleSwitch Name="SampleSwitch" OnContent="开启" OffContent="关闭" IsChecked="True" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="输入框测试：" />
+                        <TextBox Name="SampleTextBox" Text="在 DevTools 中可以实时修改我！" PlaceholderText="请输入内容..." Width="360" HorizontalAlignment="Left" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="滑块数值调节：" />
+                        <Slider Name="SampleSlider" Minimum="0" Maximum="100" Value="60" Width="360" HorizontalAlignment="Left" />
+                        <ProgressBar Value="{Binding #SampleSlider.Value}" Minimum="0" Maximum="100" Width="360" HorizontalAlignment="Left" Height="10" />
+                    </StackPanel>
+
+                    <CheckBox Name="SampleCheckBox" Content="复选框（在 DevTools 中观察 IsChecked 变化）" IsChecked="True" />
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+
+        <!-- Footer -->
+        <StackPanel Grid.Row="2" Margin="0,12,0,0" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
+            <Button Name="OpenDevToolsButton" Content="点击直接打开 DevTools (或按 F12)" />
+        </StackPanel>
+    </Grid>
+</Window>

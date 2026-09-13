@@ -408,7 +408,14 @@ public sealed class DispatcherDiagnosticsClient : IDiagnosticsClient, IDisposabl
                     && response.Data is JsonObject json
                     && json["nodeId"]?.GetValue<string>() is { Length: > 0 } nodeId)
                 {
-                    ElementPicked?.Invoke(this, nodeId);
+                    if (Avalonia.Threading.Dispatcher.UIThread.CheckAccess())
+                    {
+                        ElementPicked?.Invoke(this, nodeId);
+                    }
+                    else
+                    {
+                        Avalonia.Threading.Dispatcher.UIThread.Post(() => ElementPicked?.Invoke(this, nodeId));
+                    }
                     _pickerPolling?.Cancel();
                     return;
                 }

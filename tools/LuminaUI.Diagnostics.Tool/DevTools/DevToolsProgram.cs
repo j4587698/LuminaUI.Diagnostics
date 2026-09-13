@@ -1,15 +1,22 @@
 using Avalonia;
 using Avalonia.Fonts.Inter;
+using LuminaUI.Diagnostics.Desktop;
+using LuminaUI.Diagnostics.Mcp.Discovery;
+using LuminaUI.Diagnostics.Mcp.Transport;
 
-namespace LuminaUI.Diagnostics.Desktop;
+namespace LuminaUI.Diagnostics.Tool.DevTools;
 
-internal static class Program
+internal static class DevToolsProgram
 {
-    [STAThread]
-    public static int Main(string[] args)
+    public static int Run(string[] args)
     {
-        if (!DevToolsArguments.TryParse(args, out var options))
-            return 2;
+        var options = ResolveOptions(args);
+        if (options is null)
+        {
+            Console.Error.WriteLine("[LuminaUI.Diagnostics] No active Avalonia application found.");
+            Console.Error.WriteLine("Please start an application with .UseLuminaUIDiagnostics(), or specify --target-pid <pid> --pipe <name>.");
+            return 1;
+        }
 
         using var singleInstance = new DevToolsSingleInstance(options.TargetProcessId);
         if (!singleInstance.IsPrimary)
@@ -24,6 +31,28 @@ internal static class Program
         return 0;
     }
 
+    private static DevToolsArguments? ResolveOptions(string[] args)
+    {
+        if (DevToolsArguments.TryParse(args, out var parsed))
+            return parsed;
+
+        try
+        {
+            var discovery = new AppDiscoveryService(new PipeDiagnosticClient());
+            var apps = discovery.DiscoverAsync(timeoutMs: 1000).GetAwaiter().GetResult();
+            if (apps.Count > 0)
+            {
+                var target = apps[0];
+                return new DevToolsArguments(target.ProcessId, target.PipeName);
+            }
+        }
+        catch
+        {
+        }
+
+        return null;
+    }
+
     private static AppBuilder BuildAvaloniaApp() =>
         AppBuilder.Configure<DevToolsApplication>()
             .UsePlatformDetect()
@@ -33,7 +62,7 @@ internal static class Program
             .LogToTrace();
 }
 
-internal sealed record DevToolsArguments(int TargetProcessId, string PipeName)
+public sealed record DevToolsArguments(int TargetProcessId, string PipeName)
 {
     public static bool TryParse(string[] args, out DevToolsArguments options)
     {
