@@ -5,6 +5,8 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Styling;
 using Avalonia.Themes.Fluent;
 using Avalonia.Threading;
+using LuminaUI.Diagnostics.Localization;
+using LuminaUI.Diagnostics.Tool.DevTools;
 using LuminaUI.Diagnostics.Transport;
 using LuminaUI.Diagnostics.UI;
 
@@ -19,7 +21,7 @@ internal sealed class DevToolsApplication : Application
 
     public override void Initialize()
     {
-        LuminaDevTools.Initialize();
+        DiagnosticsLocalization.Register();
         RequestedThemeVariant = ThemeVariant.Default;
         Styles.Add(new FluentTheme());
         Styles.Add(new LuminaTheme());

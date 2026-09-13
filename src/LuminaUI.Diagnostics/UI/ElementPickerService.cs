@@ -2,6 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.VisualTree;
 using LuminaUI.Diagnostics.Inspection;
 
 namespace LuminaUI.Diagnostics.UI;
@@ -88,6 +89,29 @@ public sealed class ElementPickerService : IDisposable
         RemoveAdorner();
     }
 
+    public static Control? ResolveTargetControl(Avalonia.Visual? visual, bool deep = false)
+    {
+        if (visual is null)
+            return null;
+
+        var control = visual as Control
+            ?? visual.GetVisualAncestors().OfType<Control>().FirstOrDefault();
+        if (control is null)
+            return null;
+
+        if (deep)
+            return control;
+
+        // Walk up TemplatedParent chain so clicking inside a control template (like a TextBox's TextPresenter,
+        // ScrollViewer, Border, or a Button's ContentPresenter/TextBlock) targets the authored control itself.
+        while (control is Avalonia.StyledElement { TemplatedParent: Control templatedParent })
+        {
+            control = templatedParent;
+        }
+
+        return control;
+    }
+
     private void OnPointerMoved(object? sender, PointerEventArgs e)
     {
         if (!_isEnabled)
@@ -97,7 +121,11 @@ public sealed class ElementPickerService : IDisposable
             return;
 
         if (e.Source is Avalonia.Visual visual)
-            Highlight(visual);
+        {
+            var deep = e.KeyModifiers.HasFlag(KeyModifiers.Alt) || e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+            var target = ResolveTargetControl(visual, deep) ?? visual;
+            Highlight(target);
+        }
 
         e.Handled = true;
     }
@@ -111,7 +139,11 @@ public sealed class ElementPickerService : IDisposable
             return;
 
         if (e.Source is Avalonia.Visual visual)
-            ElementPicked?.Invoke(this, visual);
+        {
+            var deep = e.KeyModifiers.HasFlag(KeyModifiers.Alt) || e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+            var target = ResolveTargetControl(visual, deep) ?? visual;
+            ElementPicked?.Invoke(this, target);
+        }
 
         e.Handled = true;
         Disable();

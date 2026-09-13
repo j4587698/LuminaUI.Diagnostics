@@ -1,6 +1,8 @@
 <Solution>
   <Project Path="src/LuminaUI.Diagnostics.Abstractions/LuminaUI.Diagnostics.Abstractions.csproj" />
   <Project Path="src/LuminaUI.Diagnostics/LuminaUI.Diagnostics.csproj" />
+  <Project Path="tools/LuminaUI.Diagnostics.Tool/LuminaUI.Diagnostics.Tool.csproj" />
   <Project Path="tools/LuminaUI.Diagnostics.Mcp/LuminaUI.Diagnostics.Mcp.csproj" />
-  <Project Path="tools/LuminaUI.Diagnostics.Desktop/LuminaUI.Diagnostics.Desktop.csproj" />
+  <Project Path="tests/LuminaUI.Diagnostics.Tests/LuminaUI.Diagnostics.Tests.csproj" />
+  <Project Path="samples/LuminaUI.Diagnostics.Sample/LuminaUI.Diagnostics.Sample.csproj" />
 </Solution>

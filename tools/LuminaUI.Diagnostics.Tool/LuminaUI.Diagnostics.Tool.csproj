@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>lumina</ToolCommandName>
+    <PackageId>LuminaUI.Diagnostics.Tool</PackageId>
+    <Version>$(LuminaUIDiagnosticsVersion)</Version>
+    <PackageVersion>$(LuminaUIDiagnosticsVersion)</PackageVersion>
+    <AssemblyVersion>$(LuminaUIDiagnosticsAssemblyVersion)</AssemblyVersion>
+    <FileVersion>$(LuminaUIDiagnosticsAssemblyVersion)</FileVersion>
+    <InformationalVersion>$(LuminaUIDiagnosticsVersion)</InformationalVersion>
+    <Description>Unified CLI and desktop diagnostics tool for LuminaUI: MCP stdio server and visual DevTools.</Description>
+    <PackageTags>Avalonia;UI;Diagnostics;MCP;LuminaUI;dotnet-tool</PackageTags>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="LuminaUI.Diagnostics.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" />
+    <PackageReference Include="Avalonia.Desktop" />
+    <PackageReference Include="Avalonia.Fonts.Inter" />
+    <PackageReference Include="Avalonia.Themes.Fluent" />
+    <PackageReference Include="Avalonia.Controls.ColorPicker" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="ModelContextProtocol" />
+    <PackageReference Include="LuminaUI" />
+    <ProjectReference Include="..\..\src\LuminaUI.Diagnostics.Abstractions\LuminaUI.Diagnostics.Abstractions.csproj" />
+    <ProjectReference Include="..\..\src\LuminaUI.Diagnostics\LuminaUI.Diagnostics.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="Assets/**" />
+  </ItemGroup>
+
+</Project>

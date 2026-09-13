@@ -320,7 +320,7 @@ public class LuminaDevToolsViewModel : INotifyPropertyChanged, IDisposable
     {
         foreach (var node in nodes)
         {
-            if (Equals(node.Identity, target))
+            if (MatchesTarget(node, target))
                 return node;
 
             var foundChild = FindNodeAndExpand(node.Children, target);
@@ -331,6 +331,20 @@ public class LuminaDevToolsViewModel : INotifyPropertyChanged, IDisposable
             }
         }
         return null;
+    }
+
+    private static bool MatchesTarget(VisualTreeNodeViewModel node, object target)
+    {
+        if (Equals(node.Identity, target))
+            return true;
+
+        if (target is string targetNodeId && !string.IsNullOrWhiteSpace(targetNodeId))
+            return string.Equals(node.NodeId, targetNodeId, StringComparison.Ordinal);
+
+        if (node.Control is not null && ReferenceEquals(node.Control, target))
+            return true;
+
+        return false;
     }
 
     private bool _isPicking;

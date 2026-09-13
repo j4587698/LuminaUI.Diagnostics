@@ -4,8 +4,11 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
+using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Themes.Simple;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using LuminaUI.Diagnostics.Controls;
 using LuminaUI.Diagnostics.Inspection;
 using LuminaUI.Diagnostics.Interaction;
@@ -36,6 +39,71 @@ public static class HeadlessAppBuilder
 /// </summary>
 public sealed class PointerClickHandlerTests
 {
+    [AvaloniaFact]
+    public void ResolveTargetControl_TextBox_ResolvesToParentTextBox()
+    {
+        var textBox = new TextBox { Text = "Hello World", Width = 200, Height = 40 };
+        var window = new Window
+        {
+            Width = 300,
+            Height = 200,
+            Content = textBox
+        };
+        window.Show();
+        Dispatcher.UIThread.RunJobs();
+
+        static IEnumerable<Avalonia.Visual> FlattenVisuals(Avalonia.Visual v)
+        {
+            foreach (var c in v.GetVisualChildren())
+            {
+                yield return c;
+                foreach (var d in FlattenVisuals(c))
+                    yield return d;
+            }
+        }
+
+        var textPresenter = FlattenVisuals(textBox).FirstOrDefault(v => v.GetType().Name == "TextPresenter");
+        Assert.NotNull(textPresenter);
+
+        // Standard pick: resolves up to the authored TextBox
+        var resolved = LuminaUI.Diagnostics.UI.ElementPickerService.ResolveTargetControl(textPresenter, deep: false);
+        Assert.Same(textBox, resolved);
+
+        // Deep pick (e.g. holding Alt or Shift): keeps the internal TextPresenter
+        var deepResolved = LuminaUI.Diagnostics.UI.ElementPickerService.ResolveTargetControl(textPresenter, deep: true);
+        Assert.Same(textPresenter, deepResolved);
+    }
+
+    [AvaloniaFact]
+    public void ResolveTargetControl_Button_ResolvesToParentButton()
+    {
+        var button = new Button { Content = "Click me" };
+        var window = new Window
+        {
+            Width = 300,
+            Height = 200,
+            Content = button
+        };
+        window.Show();
+        Dispatcher.UIThread.RunJobs();
+
+        static IEnumerable<Avalonia.Visual> FlattenVisuals(Avalonia.Visual v)
+        {
+            foreach (var c in v.GetVisualChildren())
+            {
+                yield return c;
+                foreach (var d in FlattenVisuals(c))
+                    yield return d;
+            }
+        }
+
+        var contentPresenter = FlattenVisuals(button).FirstOrDefault(v => v.GetType().Name == "ContentPresenter");
+        Assert.NotNull(contentPresenter);
+
+        var resolved = LuminaUI.Diagnostics.UI.ElementPickerService.ResolveTargetControl(contentPresenter, deep: false);
+        Assert.Same(button, resolved);
+    }
+
     [AvaloniaFact]
     public async Task Click_RadioButton_TogglesIsChecked()
     {

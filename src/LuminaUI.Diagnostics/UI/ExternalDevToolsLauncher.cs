@@ -20,7 +20,7 @@ internal static class ExternalDevToolsLauncher
         if (executable is null)
             return false;
 
-        var arguments = $"--target-pid {targetProcessId} --pipe \"{host.DiagnosticsPipeName}\"";
+        var arguments = $"devtools --target-pid {targetProcessId} --pipe \"{host.DiagnosticsPipeName}\"";
         var startInfo = executable.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)
             ? new ProcessStartInfo("dotnet", $"\"{executable}\" {arguments}")
             : new ProcessStartInfo(executable, arguments);
@@ -64,15 +64,60 @@ internal static class ExternalDevToolsLauncher
         if (!string.IsNullOrWhiteSpace(configuredPath) && File.Exists(configuredPath))
             return Path.GetFullPath(configuredPath);
 
+        var toolName = OperatingSystem.IsWindows() ? "lumina.exe" : "lumina";
+
+        // 1. Check global dotnet tools directory (~/.dotnet/tools/lumina)
+        var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        var globalTool = Path.Combine(userProfile, ".dotnet", "tools", toolName);
+        if (File.Exists(globalTool))
+            return globalTool;
+
+        // 2. Check local application base directory
+        var localTool = Path.Combine(AppContext.BaseDirectory, toolName);
+        if (File.Exists(localTool))
+            return localTool;
+
+        // 3. Check subdirectory lumina-devtools
         var directory = Path.Combine(AppContext.BaseDirectory, "lumina-devtools");
-        var executableName = OperatingSystem.IsWindows()
+        var directoryTool = Path.Combine(directory, toolName);
+        if (File.Exists(directoryTool))
+            return directoryTool;
+
+        var legacyDesktopName = OperatingSystem.IsWindows()
             ? "LuminaUI.Diagnostics.Desktop.exe"
             : "LuminaUI.Diagnostics.Desktop";
-        var executable = Path.Combine(directory, executableName);
-        if (File.Exists(executable))
-            return executable;
+        var legacyExecutable = Path.Combine(directory, legacyDesktopName);
+        if (File.Exists(legacyExecutable))
+            return legacyExecutable;
 
-        var assembly = Path.Combine(directory, "LuminaUI.Diagnostics.Desktop.dll");
-        return File.Exists(assembly) ? assembly : null;
+        var assembly = Path.Combine(directory, "LuminaUI.Diagnostics.Tool.dll");
+        if (File.Exists(assembly))
+            return assembly;
+
+        // 4. Check system PATH
+        return FindInPath(toolName);
+    }
+
+    private static string? FindInPath(string fileName)
+    {
+        var pathEnv = Environment.GetEnvironmentVariable("PATH");
+        if (string.IsNullOrWhiteSpace(pathEnv))
+            return null;
+
+        var paths = pathEnv.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        foreach (var p in paths)
+        {
+            try
+            {
+                var full = Path.Combine(p, fileName);
+                if (File.Exists(full))
+                    return full;
+            }
+            catch
+            {
+            }
+        }
+
+        return null;
     }
 }

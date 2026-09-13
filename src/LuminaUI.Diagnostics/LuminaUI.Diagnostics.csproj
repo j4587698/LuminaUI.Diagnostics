@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
@@ -8,24 +8,20 @@
     <AssemblyVersion>$(LuminaUIDiagnosticsAssemblyVersion)</AssemblyVersion>
     <FileVersion>$(LuminaUIDiagnosticsAssemblyVersion)</FileVersion>
     <InformationalVersion>$(LuminaUIDiagnosticsVersion)</InformationalVersion>
-    <Description>Application-side named-pipe diagnostics host for LuminaUI-enabled Avalonia applications.</Description>
+    <Description>Application-side named-pipe diagnostics host for Avalonia applications.</Description>
     <PackageTags>Avalonia;UI;Diagnostics;MCP;LuminaUI</PackageTags>
     <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Avalonia" />
-    <PackageReference Include="Avalonia.Controls.ColorPicker" />
     <PackageReference Include="Avalonia.Markup.Xaml.Loader" />
+    <PackageReference Include="SkiaSharp" />
     <ProjectReference Include="..\LuminaUI.Diagnostics.Abstractions\LuminaUI.Diagnostics.Abstractions.csproj" />
-    <PackageReference Include="LuminaUI" />
   </ItemGroup>
 
   <ItemGroup>
-    <AvaloniaResource Include="Assets/**" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <InternalsVisibleTo Include="LuminaUI.Diagnostics.Tool" />
     <InternalsVisibleTo Include="LuminaUI.Diagnostics.Tests" />
   </ItemGroup>
 

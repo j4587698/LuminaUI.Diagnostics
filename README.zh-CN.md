@@ -2,9 +2,9 @@
 
 [English README](README.md)
 
-[LuminaUI](https://github.com/anomalyco/LuminaUI) 的实时诊断基础设施。通过命名管道协议暴露 Avalonia 应用的控件树、属性、数据上下文、样式、资源和绑定错误，并提供 [MCP](https://modelcontextprotocol.io) stdio server 方便 AI 工具（如 opencode）直接交互。
+针对 Avalonia 应用的实时诊断基础设施。通过命名管道协议暴露运行中 Avalonia 应用的控件树、属性、数据上下文、样式、资源和绑定错误，并提供统一的全局 CLI / 桌面工具 `lumina`，同时支持 [MCP](https://modelcontextprotocol.io) stdio server（方便 AI 工具如 opencode、Cursor 直接交互）以及独立进程级 DevTools 可视化调试面板。
 
-> LuminaUI.Diagnostics 是 LuminaUI 生态的独立仓库。如果你在使用 LuminaUI 组件库，可以直接引用对应的 NuGet 包来启用诊断能力。
+> **轻量零污染**：宿主诊断包 `LuminaUI.Diagnostics` 仅依赖原生 Avalonia，**不包含任何第三方组件库依赖**，任何 Avalonia 项目均可放心接入；所有 DevTools 窗口界面与 UI 组件均隔离在独立的 `lumina` 进程中运行。
 
 ---
 
@@ -13,8 +13,8 @@
 | 包名 | 类型 | 用途 |
 | --- | --- | --- |
 | `LuminaUI.Diagnostics.Abstractions` | NuGet | 共享的命名管道协议契约，供 Host、Client 和 MCP 工具使用。 |
-| `LuminaUI.Diagnostics` | NuGet | 应用侧诊断 Host，通过命名管道暴露控件树、属性、数据上下文、样式、资源、绑定错误等。 |
-| `LuminaUI.Diagnostics.Mcp` | dotnet tool | MCP stdio server，连接运行中应用的诊断 Host，将诊断能力暴露给 MCP 客户端（如 opencode）。 |
+| `LuminaUI.Diagnostics` | NuGet | 应用侧轻量诊断 Host，通过命名管道暴露控件树、属性、数据上下文、样式、资源、绑定错误等（纯 Avalonia，零外部 UI 依赖）。 |
+| `LuminaUI.Diagnostics.Tool` | dotnet tool | 统一诊断工具（CLI 命令 `lumina`），包含 MCP stdio 服务与独立进程级 DevTools 调试面板。 |
 
 ---
 
@@ -42,9 +42,9 @@ public static AppBuilder BuildAvaloniaApp()
 #endif
 ```
 
-`UseLuminaUIDiagnostics()` 默认启动命名管道服务器并注册 F12 打开 DevTools。
+`UseLuminaUIDiagnostics()` 默认启动命名管道服务器，并在用户按下 F12 时自动唤起外部 `lumina` 调试器窗口。
 
-仅需 MCP 不要 DevTools？关闭即可：
+仅需 MCP 不要 DevTools 唤起？关闭即可：
 
 ```csharp
 .UseLuminaUIDiagnostics(o => o.EnableDevTools = false);
@@ -58,35 +58,39 @@ public static AppBuilder BuildAvaloniaApp()
 });
 ```
 
-### 2. 使用 MCP 工具
+---
 
-安装全局 tool（传统方式）：
+### 2. 安装与使用统一诊断工具 (`lumina`)
 
-```bash
-dotnet tool install -g LuminaUI.Diagnostics.Mcp
-lumina-mcp
-```
-
-.NET 10+ 可用 `dnx` 免安装运行（类似 `npx`）：
+安装全局工具（一次安装，AI 调试与可视化面板全齐）：
 
 ```bash
-dnx lumina-mcp
+dotnet tool install -g LuminaUI.Diagnostics.Tool
 ```
 
-然后在支持 MCP 的客户端（如 opencode、VS Code）中配置：
+.NET 10+ 也可以用 `dnx` 免安装即开即用（类似 `npx`）：
+
+```bash
+dnx lumina --help
+```
+
+#### A. 作为 MCP Server 运行（供 AI 客户端使用）
+
+在支持 MCP 的客户端（如 opencode、Cursor、VS Code、Claude Desktop）中配置：
 
 ```json
 {
   "servers": {
     "LuminaUI.Diagnostics": {
       "type": "stdio",
-      "command": "lumina-mcp"
+      "command": "lumina",
+      "args": ["mcp"]
     }
   }
 }
 ```
 
-如果用的是 `dnx` 免安装方式，command 改成：
+如果使用 `dnx` 免安装方式：
 
 ```json
 {
@@ -94,20 +98,30 @@ dnx lumina-mcp
     "LuminaUI.Diagnostics": {
       "type": "stdio",
       "command": "dnx",
-      "args": ["lumina-mcp"]
+      "args": ["lumina", "mcp"]
     }
   }
 }
 ```
 
-### 3. 独立 DevTools 窗口
+#### B. 作为独立 DevTools 调试面板运行
 
-`tools/LuminaUI.Diagnostics.Desktop` 是一个独立的桌面进程，通过命名管道连接到应用，提供 DevTools 窗口（需在应用侧设置 `options.StartImmediately = true` 或调用 `UseLuminaUIDiagnostics()`）。
+```bash
+# 启动 DevTools 窗口（自动扫描并连接本机运行中的 Avalonia 应用）
+lumina
+
+# 或明确指定子命令
+lumina devtools
+
+# 或连接指定进程与管道
+lumina devtools --target-pid 12345 --pipe lumina-diag-12345
+```
 
 ---
 
 ## 功能特性
 
+- **进程级解耦** — 调试面板在独立进程中运行，不占用目标应用内存与 GC，不污染用户依赖
 - **控件树检查** — 可视化/逻辑树遍历，支持按名称、类型或文本搜索
 - **属性编辑** — 读取和设置 Avalonia 属性（StyledProperty / DirectProperty / CLR 属性）
 - **数据上下文** — 查看 DataContext 类型和属性值，支持展开集合
@@ -121,16 +135,24 @@ dnx lumina-mcp
 
 ---
 
-## 构建
+## 构建与测试
+
+构建整套方案：
 
 ```bash
 dotnet build
 ```
 
-测试：
+运行全部单元测试：
 
 ```bash
 dotnet test
+```
+
+打包全局工具：
+
+```bash
+dotnet pack tools/LuminaUI.Diagnostics.Tool
 ```
 
 ---

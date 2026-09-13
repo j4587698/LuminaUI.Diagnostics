@@ -12,10 +12,11 @@ internal static class DiagnosticsLocalization
         if (_registered)
             return;
 
+        var assembly = typeof(DiagnosticsLocalization).Assembly;
         LuminaLocalization.RegisterResourceManager(
             new ResourceManager(
-                "LuminaUI.Diagnostics.Localization.Resources.DevToolsStrings",
-                typeof(DiagnosticsLocalization).Assembly),
+                $"{assembly.GetName().Name}.Localization.Resources.DevToolsStrings",
+                assembly),
             priority: 20);
 
         _registered = true;

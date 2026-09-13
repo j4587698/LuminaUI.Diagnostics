@@ -24,6 +24,7 @@
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="$(CommunityToolkitMvvmVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="$(MicrosoftExtensionsHostingVersion)" />
     <PackageVersion Include="ModelContextProtocol" Version="$(ModelContextProtocolVersion)" />
+    <PackageVersion Include="SkiaSharp" Version="3.119.1" />
     <PackageVersion Include="LuminaUI" Version="$(LuminaUIVersion)" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
     <PackageVersion Include="xunit.v3" Version="$(XunitVersion)" />

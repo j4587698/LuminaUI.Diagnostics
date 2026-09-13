@@ -1,5 +1,6 @@
 using System.Text.Json.Nodes;
 using Avalonia.Controls;
+using Avalonia.VisualTree;
 using LuminaUI.Diagnostics.Abstractions;
 using LuminaUI.Diagnostics.Dispatch;
 using LuminaUI.Diagnostics.Inspection;
@@ -51,8 +52,12 @@ internal sealed class RemoteElementPickerSession : IDisposable
 
     private void OnElementPicked(object? sender, object element)
     {
-        if (element is not Control control)
+        var control = element as Control
+            ?? (element as Avalonia.Visual)?.GetVisualAncestors().OfType<Control>().FirstOrDefault();
+        if (control is null)
             return;
+
+        control = ElementPickerService.ResolveTargetControl(control) ?? control;
 
         PickedNodeId = _nodeRegistry.RegisterNode(control);
         Generation++;

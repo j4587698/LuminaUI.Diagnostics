@@ -1,5 +1,11 @@
-using LuminaUI.Diagnostics.Mcp;
-using Microsoft.Extensions.Hosting;
+using System.Threading.Tasks;
 
-await ServerHostBuilder.Build(args).RunAsync();
+namespace LuminaUI.Diagnostics.Mcp;
 
+public static class Program
+{
+    public static async Task<int> Main(string[] args)
+    {
+        return await LuminaUI.Diagnostics.Tool.Program.Main(args);
+    }
+}
