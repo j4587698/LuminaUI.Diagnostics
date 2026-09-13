@@ -1,6 +1,6 @@
 # LuminaUI Diagnostics MCP 工具
 
-`LuminaUI.Diagnostics.Mcp` 是独立的 dotnet tool 包，用 stdio MCP server 把 MCP 客户端连接到运行中的 Avalonia 应用。
+`LuminaUI.Diagnostics.Tool` 是统一的 dotnet tool 包（全局命令 `lumina`），内置 stdio MCP server 把 MCP 客户端连接到运行中的 Avalonia 应用。
 
 它只负责 live diagnostics，不索引文档。组件知识、示例、设计令牌、API 和包安装信息由独立的 `DotNetCatalog.Mcp` 服务提供。
 
@@ -39,14 +39,14 @@ lumina-ui-diagnostics-{pid}
 ## 运行工具
 
 ```powershell
-dotnet tool install --global LuminaUI.Diagnostics.Mcp
-lumina-mcp
+dotnet tool install --global LuminaUI.Diagnostics.Tool
+lumina mcp
 ```
 
 本仓库开发时也可以直接运行项目：
 
 ```powershell
-dotnet run --project tools/LuminaUI.Diagnostics.Mcp/LuminaUI.Diagnostics.Mcp.csproj
+dotnet run --project tools/LuminaUI.Diagnostics.Tool/LuminaUI.Diagnostics.Tool.csproj -- mcp
 ```
 
 ## 目标选择
